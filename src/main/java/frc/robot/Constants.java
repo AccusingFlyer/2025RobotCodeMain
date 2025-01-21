@@ -36,6 +36,9 @@ public final class Constants {
     REPLAY
   }
 
+  public static final Mode ROBOT_MODE =
+      "Crash".equals(System.getenv("CI_NAME")) ? Mode.SIM : Mode.SIM;
+
   public static final int kMotorPort = 0;
   public static final int kEncoderAChannel = 0;
   public static final int kEncoderBChannel = 1;

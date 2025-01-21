@@ -25,6 +25,10 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.Elevator.Elevator;
+import frc.robot.subsystems.drive.Elevator.ElevatorIO;
+import frc.robot.subsystems.drive.Elevator.ElevatorIOSim;
+import frc.robot.subsystems.drive.Elevator.ElevatorIOTalonFX;
 import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.ModuleIO;
@@ -41,7 +45,7 @@ import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 public class RobotContainer {
   // Subsystems
   private final Drive drive;
-  //   private final Elevator elevator;
+  private final Elevator elevator;
 
   // Controller
   private final CommandXboxController controller = new CommandXboxController(0);
@@ -61,6 +65,7 @@ public class RobotContainer {
                 new ModuleIOTalonFX(TunerConstants.FrontRight),
                 new ModuleIOTalonFX(TunerConstants.BackLeft),
                 new ModuleIOTalonFX(TunerConstants.BackRight));
+        elevator = new Elevator(new ElevatorIOTalonFX());
         break;
 
       case SIM:
@@ -72,6 +77,7 @@ public class RobotContainer {
                 new ModuleIOSim(TunerConstants.FrontRight),
                 new ModuleIOSim(TunerConstants.BackLeft),
                 new ModuleIOSim(TunerConstants.BackRight));
+        elevator = new Elevator(new ElevatorIOSim());
         break;
 
       default:
@@ -83,6 +89,7 @@ public class RobotContainer {
                 new ModuleIO() {},
                 new ModuleIO() {},
                 new ModuleIO() {});
+        elevator = new Elevator(new ElevatorIO() {});
         break;
     }
 
@@ -147,7 +154,11 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    // controller.x().onTrue(elevator.moveElevator());
+    controller.povUp().onTrue(elevator.runtoL4());
+    controller.povLeft().onTrue(elevator.runtoL3());
+    controller.povDown().onTrue(elevator.runtoL2());
+    controller.povRight().onTrue(elevator.runtoL1());
+    controller.leftStick().onTrue(elevator.idleElevatorPos());
   }
 
   /**
