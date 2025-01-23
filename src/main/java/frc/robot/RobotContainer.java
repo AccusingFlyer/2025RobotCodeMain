@@ -154,9 +154,9 @@ public class RobotContainer {
                     drive)
                 .ignoringDisable(true));
 
-    controller.povUp().onTrue(elevator.runtoL4());
+    controller.povUp().whileTrue(elevator.runtoL4());
     controller.povLeft().onTrue(elevator.runtoL3());
-    controller.povDown().onTrue(elevator.runtoL2());
+    controller.povDown().whileTrue(elevator.runtoL2());
     controller.povRight().onTrue(elevator.runtoL1());
     controller.leftStick().onTrue(elevator.idleElevatorPos());
   }
