@@ -63,14 +63,13 @@ public class ElevatorIOSim implements ElevatorIO {
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    elevatorSim.update(0.02);
-
-    inputs.currentElevatorHeight = elevatorSim.getPositionMeters() * METERS_PER_ROTATION.in(Meters);
+    inputs.currentElevatorHeight = elevatorSim.getPositionMeters();
     inputs.elevatorHeightSetpoint = pidController.getSetpoint().position;
     inputs.elevatorHeightGoalpoint = pidController.getGoal().position;
 
     inputs.elevatorVelocity =
-        elevatorSim.getVelocityMetersPerSecond() * METERS_PER_ROTATION.in(Meters);
+        elevatorSim.getVelocityMetersPerSecond()
+            * METERS_PER_ROTATION.in(Meters); // Does it return in rotations?
     inputs.elevatorVelocitySetpoint = pidController.getSetpoint().velocity;
     inputs.elevatorVelocityGoalpoint = pidController.getGoal().velocity;
 
@@ -100,10 +99,13 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   public void runElevator() {
-    appliedVoltage =
-        pidController.calculate(elevatorSim.getPositionMeters() * METERS_PER_ROTATION.in(Meters))
-            + ffcontroller.calculate(pidController.getSetpoint().velocity);
-    elevatorSim.setInputVoltage(appliedVoltage);
+    appliedVoltage = 2;
+    // pidController.calculate(elevatorSim.getPositionMeters() * METERS_PER_ROTATION.in(Meters))
+    //     + ffcontroller.calculate(pidController.getSetpoint().velocity);
+    // elevatorSim.setInputVoltage(appliedVoltage);
+    elevatorSim.setInputVoltage(12);
+    elevatorSim.setInput(12 * pidController.calculate(elevatorSim.getPositionMeters()));
+    elevatorSim.update(0.02);
   }
 
   @Override
