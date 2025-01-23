@@ -3,9 +3,14 @@
   "robotLength": 0.9,
   "holonomicMode": true,
   "pathFolders": [
-    "Quarter Pounder"
+    "1 coral",
+    "Quarter Pounder",
+    "Reverse Quarter Pounder"
   ],
-  "autoFolders": [],
+  "autoFolders": [
+    "1 coral",
+    "Quarter Pounders"
+  ],
   "defaultMaxVel": 3.0,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 540.0,

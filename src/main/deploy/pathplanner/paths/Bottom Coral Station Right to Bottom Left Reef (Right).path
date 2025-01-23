@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 1.6303278688524592,
+        "y": 0.7103995901639337
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.4158482714822216,
+        "y": 1.3926121018309354
+      },
+      "isLocked": false,
+      "linkedName": "Bottom Coral Station Right"
+    },
+    {
+      "anchor": {
+        "x": 3.9919057377049176,
+        "y": 2.7962602459016397
+      },
+      "prevControl": {
+        "x": 2.7289392371757364,
+        "y": 1.6647161260290948
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "Bottom Left Reef (Right)"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": 60.42216131873863
+  },
+  "reversed": false,
+  "folder": "Reverse Quarter Pounder",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": 54.293308599397164
+  },
+  "useDefaultConstraints": true
+}
