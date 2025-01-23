@@ -16,6 +16,7 @@ public class Elevator extends SubsystemBase {
   @Override
   public void periodic() {
     io.updateInputs(inputs);
+    io.runElevator();
     Logger.processInputs("Elevator", inputs);
   }
 
@@ -32,31 +33,28 @@ public class Elevator extends SubsystemBase {
   public Command runtoL4() {
     return runOnce(
         () -> {
-          io.setHeightGoalpoint(2.5146);
+          io.setHeightGoalpoint(2.5146); // FIXME: Replace with constant
         });
   }
 
   public Command runtoL3() {
     return runOnce(
         () -> {
-          io.setHeightGoalpoint(1.54305);
-          io.runElevator();
+          io.setHeightGoalpoint(1.54305); // FIXME: Replace with constant
         });
   }
 
   public Command runtoL2() {
     return runOnce(
         () -> {
-          io.setHeightGoalpoint(1.25);
-          io.runElevator();
+          io.setHeightGoalpoint(1.25); // FIXME: Replace with constant
         });
   }
 
   public Command runtoL1() {
     return runOnce(
         () -> {
-          io.setHeightGoalpoint(1);
-          io.runElevator();
+          io.setHeightGoalpoint(1); // FIXME: Replace with constant
         });
   }
 
@@ -64,7 +62,6 @@ public class Elevator extends SubsystemBase {
     return runOnce(
         () -> {
           io.setHeightGoalpoint(0.1);
-          io.runElevator();
         });
   }
 }

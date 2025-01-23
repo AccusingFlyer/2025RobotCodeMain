@@ -6,12 +6,14 @@ import static edu.wpi.first.units.Units.MetersPerSecond;
 import static frc.robot.subsystems.drive.Elevator.ElevatorConstants.*;
 import static frc.robot.subsystems.drive.Elevator.ElevatorConstants.Sim.*;
 
+import com.ctre.phoenix6.configs.FeedbackConfigs;
+import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.controller.ElevatorFeedforward;
 import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj.simulation.ElevatorSim;
-import frc.robot.subsystems.drive.Elevator.ElevatorIO.ElevatorIOInputs;
 
 public class ElevatorIOSim implements ElevatorIO {
   private ProfiledPIDController pidController;
@@ -25,7 +27,6 @@ public class ElevatorIOSim implements ElevatorIO {
 
   private double appliedVoltage;
   private boolean zeroed;
-  public double metersPerRotation;
 
   public ElevatorIOSim() {
     elevatorSim =
@@ -58,19 +59,23 @@ public class ElevatorIOSim implements ElevatorIO {
     leftMotorSim = leftMotor.getSimState();
     rightMotorSim = rightMotor.getSimState();
 
-    metersPerRotation = METERS_PER_ROTATION.in(Meters);
+    leftMotor
+        .getConfigurator()
+        .apply(new FeedbackConfigs().withSensorToMechanismRatio(METERS_PER_ROTATION.in(Meters)));
+    // FIXME: This should probably be done by having right motor "follow" the left motor instead of
+    // individually configing both
+    rightMotor
+        .getConfigurator()
+        .apply(new FeedbackConfigs().withSensorToMechanismRatio(METERS_PER_ROTATION.in(Meters)));
   }
 
   @Override
   public void updateInputs(ElevatorIOInputs inputs) {
-    elevatorSim.update(0.02);
-
-    inputs.currentElevatorHeight = elevatorSim.getPositionMeters() * METERS_PER_ROTATION.in(Meters);
+    inputs.currentElevatorHeight = elevatorSim.getPositionMeters();
     inputs.elevatorHeightSetpoint = pidController.getSetpoint().position;
     inputs.elevatorHeightGoalpoint = pidController.getGoal().position;
 
-    inputs.elevatorVelocity =
-        elevatorSim.getVelocityMetersPerSecond() * METERS_PER_ROTATION.in(Meters);
+    inputs.elevatorVelocity = elevatorSim.getVelocityMetersPerSecond();
     inputs.elevatorVelocitySetpoint = pidController.getSetpoint().velocity;
     inputs.elevatorVelocityGoalpoint = pidController.getGoal().velocity;
 
@@ -78,21 +83,12 @@ public class ElevatorIOSim implements ElevatorIO {
     inputs.rightMotorVoltInput = appliedVoltage;
     inputs.elevatorZeroed = zeroed;
 
-    leftMotorSim.setRawRotorPosition(
-        elevatorSim.getPositionMeters() / METERS_PER_ROTATION.in(Meters));
-    leftMotorSim.setRotorVelocity(
-        elevatorSim.getVelocityMetersPerSecond() / METERS_PER_ROTATION.in(Meters));
+    leftMotorSim.setRawRotorPosition(elevatorSim.getPositionMeters());
+    leftMotorSim.setRotorVelocity(elevatorSim.getVelocityMetersPerSecond());
     rightMotorSim.setRawRotorPosition(
-        -elevatorSim.getPositionMeters()
-            / METERS_PER_ROTATION.in(Meters)); // negative bc right is inversed (probably)
-    rightMotorSim.setRotorVelocity(
-        -elevatorSim.getVelocityMetersPerSecond() / METERS_PER_ROTATION.in(Meters));
+        -elevatorSim.getPositionMeters()); // negative bc right is inversed (probably)
+    rightMotorSim.setRotorVelocity(-elevatorSim.getVelocityMetersPerSecond());
   }
-
-  // @Override
-  // public void setVoltage(double volts) {
-  //   appliedVolts = MathUtil.clamp(volts, -12.0, 12.0);
-  // }
 
   @Override
   public void setHeightGoalpoint(double height) {
@@ -100,10 +96,25 @@ public class ElevatorIOSim implements ElevatorIO {
   }
 
   public void runElevator() {
-    appliedVoltage =
-        pidController.calculate(elevatorSim.getPositionMeters() * METERS_PER_ROTATION.in(Meters))
-            + ffcontroller.calculate(pidController.getSetpoint().velocity);
-    elevatorSim.setInputVoltage(appliedVoltage);
+    double batteryVoltage = RobotController.getBatteryVoltage();
+    double pidOutput = pidController.calculate(elevatorSim.getPositionMeters());
+    // double ffOutput = // TODO: Feedforward shouldn't be for velocity. It is basically a constant
+    // output voltage just enough to hold the elevator up. Also your constants are all currently 0.
+
+    appliedVoltage = batteryVoltage * pidOutput;
+
+    leftMotorSim.setSupplyVoltage(batteryVoltage);
+    rightMotorSim.setSupplyVoltage(batteryVoltage);
+
+    // While this may seem redundant (and it is if you're only doing voltage), it allows you to
+    // change it to a different type of control (like motion magic)
+    // I highly recommend that you swap the profiled PID controller for internal motion magic.
+    leftMotor.setControl(new VoltageOut(appliedVoltage));
+    rightMotor.setControl(new VoltageOut(appliedVoltage));
+
+    elevatorSim.setInputVoltage(batteryVoltage);
+    elevatorSim.setInput(leftMotorSim.getMotorVoltage());
+    elevatorSim.update(0.02);
   }
 
   @Override
