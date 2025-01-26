@@ -24,16 +24,16 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.Elevator.Elevator;
-import frc.robot.subsystems.drive.Elevator.ElevatorIO;
-import frc.robot.subsystems.drive.Elevator.ElevatorIOSim;
-import frc.robot.subsystems.drive.Elevator.ElevatorIOTalonFX;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.ModuleIO;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.subsystems.Drive;
+import frc.robot.subsystems.subsystems.Elevator.Elevator;
+import frc.robot.subsystems.subsystems.Elevator.ElevatorIO;
+import frc.robot.subsystems.subsystems.Elevator.ElevatorIOSim;
+import frc.robot.subsystems.subsystems.Elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.subsystems.GyroIO;
+import frc.robot.subsystems.subsystems.GyroIOPigeon2;
+import frc.robot.subsystems.subsystems.ModuleIO;
+import frc.robot.subsystems.subsystems.ModuleIOSim;
+import frc.robot.subsystems.subsystems.ModuleIOTalonFX;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**

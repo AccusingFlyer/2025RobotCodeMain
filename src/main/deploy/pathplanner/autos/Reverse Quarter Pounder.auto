@@ -7,43 +7,43 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Start to Bottom Right Reef (Right)"
+            "pathName": "Bottom Start to F"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Right Reef (Right) to Bottom Coral Station Right"
+            "pathName": "F to Bottom Coral Station Right"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Coral Station Right to Bottom Left Reef (Right)"
+            "pathName": "Bottom Coral Station Right to D"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Left Reef (Right) to Bottom Coral Station (Right)"
+            "pathName": "D to Bottom Coral Station (Right)"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Coral Station (Right) to Bottom Left Reef (Left)"
+            "pathName": "Bottom Coral Station (Right) to C"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Left Reef (Left) to Bottom Coral Station (Right)"
+            "pathName": "C to Bottom Coral Station (Right)"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "Bottom Coral Station (Right) to Left Reef (Right)"
+            "pathName": "Bottom Coral Station (Right) to B"
           }
         }
       ]
