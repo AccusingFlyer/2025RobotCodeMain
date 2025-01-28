@@ -13,6 +13,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.RobotBase;
 
@@ -66,4 +67,19 @@ public final class Constants {
   //  = (Pi * D) / ppr
   public static final double kElevatorEncoderDistPerPulse =
       2.0 * Math.PI * kElevatorDrumRadius / 4096;
+
+  public static final class Vision {
+    public static final String APRILTAG_FRONT_LIMELIGHT_NAME = "limelight-aprilf";
+    public static final String APRILTAG_BACK_LIMELIGHT_NAME = "limelight-aprilb";
+    public static final String OBJ_DETECTION_LIMELIGHT_NAME = "limelight-neural";
+
+    public static final Translation2d FIELD_CORNER = new Translation2d(16.54, 8.02);
+
+    // how many degrees back is your limelight rotated from perfectly vertical?
+    public static final double limelightMountAngleDegrees = 22.0;
+    // distance from the center of the Limelight lens to the floor
+    public static final double limelightLensHeightInches = 0.233;
+    // height of april tags from the floor
+    public static final double AprilTagHeight = 1.335;
+  }
 }

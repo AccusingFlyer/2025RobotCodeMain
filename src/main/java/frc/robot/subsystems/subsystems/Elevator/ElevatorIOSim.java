@@ -62,7 +62,8 @@ public class ElevatorIOSim implements ElevatorIO {
     leftMotor
         .getConfigurator()
         .apply(new FeedbackConfigs().withSensorToMechanismRatio(METERS_PER_ROTATION.in(Meters)));
-    // FIXME: This should probably be done by having right motor "follow" the left motor instead of
+    // FIXME: This should probably be done by having right motor "follow" the left
+    // motor instead of
     // individually configing both
     rightMotor
         .getConfigurator()
@@ -98,17 +99,21 @@ public class ElevatorIOSim implements ElevatorIO {
   public void runElevator() {
     double batteryVoltage = RobotController.getBatteryVoltage();
     double pidOutput = pidController.calculate(elevatorSim.getPositionMeters());
-    // double ffOutput = // TODO: Feedforward shouldn't be for velocity. It is basically a constant
-    // output voltage just enough to hold the elevator up. Also your constants are all currently 0.
+    // double ffOutput = // TODO: Feedforward shouldn't be for velocity. It is
+    // basically a constant
+    // output voltage just enough to hold the elevator up. Also your constants are
+    // all currently 0.
 
     appliedVoltage = batteryVoltage * pidOutput;
 
     leftMotorSim.setSupplyVoltage(batteryVoltage);
     rightMotorSim.setSupplyVoltage(batteryVoltage);
 
-    // While this may seem redundant (and it is if you're only doing voltage), it allows you to
+    // While this may seem redundant (and it is if you're only doing voltage), it
+    // allows you to
     // change it to a different type of control (like motion magic)
-    // I highly recommend that you swap the profiled PID controller for internal motion magic.
+    // I highly recommend that you swap the profiled PID controller for internal
+    // motion magic.
     leftMotor.setControl(new VoltageOut(appliedVoltage));
     rightMotor.setControl(new VoltageOut(appliedVoltage));
 
@@ -124,6 +129,6 @@ public class ElevatorIOSim implements ElevatorIO {
 
   // @Override
   // public boolean isZeroed() {
-  // 	return zeroed;
+  // return zeroed;
   // }
 }

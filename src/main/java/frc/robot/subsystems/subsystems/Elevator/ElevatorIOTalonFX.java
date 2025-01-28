@@ -140,6 +140,6 @@ public class ElevatorIOTalonFX implements ElevatorIO {
 
   // @Override
   // public boolean isZeroed() {
-  // 	return leftMotorZeroed && rightMotorZeroed;
+  // return leftMotorZeroed && rightMotorZeroed;
   // }
 }

@@ -27,7 +27,8 @@ public class ElevatorConstants {
   public static final LinearVelocity ZEROING_VELOCITY = MetersPerSecond.of(0.25);
   public static final Current ZEROING_CURRENT_LIMIT = Amps.of(10.0);
 
-  // TODO: Note for MahiDaMan, All of these are RANDOM values, once the robot is built GET REAL ONES
+  // TODO: Note for MahiDaMan, All of these are RANDOM values, once the robot is
+  // built GET REAL ONES
   public static final Distance L4_HEIGHT = Meters.of(2.5146);
   public static final Distance L3_HEIGHT = Meters.of(1.54305);
   public static final Distance L2_HEIGHT = Meters.of(1.54305);
@@ -53,7 +54,8 @@ public class ElevatorConstants {
     public static final boolean SIMULATE_GRAVITY = true;
     public static final Distance STARTING_HEIGHT = Inches.of(37);
 
-    // TODO Tune once we get new values, this has Izone so I didn't make it a supplier
+    // TODO Tune once we get new values, this has Izone so I didn't make it a
+    // supplier
     public static final PIDConstants PROFILED_PID_CONSTANTS = new PIDConstants(2, 0, 0, 0);
   }
 

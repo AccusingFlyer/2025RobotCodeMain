@@ -14,8 +14,11 @@
 package frc.robot.subsystems.subsystems;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.Constants.Vision.APRILTAG_BACK_LIMELIGHT_NAME;
+import static frc.robot.Constants.Vision.APRILTAG_FRONT_LIMELIGHT_NAME;
 
 import com.ctre.phoenix6.CANBus;
+import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
@@ -27,6 +30,7 @@ import edu.wpi.first.hal.FRCNetComm.tInstances;
 import edu.wpi.first.hal.FRCNetComm.tResourceType;
 import edu.wpi.first.hal.HAL;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -43,12 +47,17 @@ import edu.wpi.first.wpilibj.Alert;
 import edu.wpi.first.wpilibj.Alert.AlertType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.subsystems.Vision.Limelight;
+import frc.robot.subsystems.subsystems.Vision.LimelightHelpers;
+import frc.robot.subsystems.subsystems.Vision.LimelightHelpers.PoseEstimate;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -103,8 +112,11 @@ public class Drive extends SubsystemBase {
         new SwerveModulePosition(),
         new SwerveModulePosition()
       };
-  private SwerveDrivePoseEstimator poseEstimator =
-      new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+  private SwerveDrivePoseEstimator poseEstimator;
+  Limelight limelight;
+  private final Field2d m_field = new Field2d();
+
+  private final Pigeon2 pigeon = new Pigeon2(1, "rio");
 
   public Drive(
       GyroIO gyroIO,
@@ -113,6 +125,9 @@ public class Drive extends SubsystemBase {
       ModuleIO blModuleIO,
       ModuleIO brModuleIO) {
     this.gyroIO = gyroIO;
+    this.limelight = Limelight.getInstance();
+    SmartDashboard.putData("Field", m_field);
+    SmartDashboard.putBoolean("Vision/force use limelight", false);
     modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
     modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
     modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
@@ -145,6 +160,8 @@ public class Drive extends SubsystemBase {
         (targetPose) -> {
           Logger.recordOutput("Odometry/TrajectorySetpoint", targetPose);
         });
+    PathPlannerLogging.setLogActivePathCallback(
+        (poses) -> m_field.getObject("path").setPoses(poses));
 
     // Configure SysId
     sysId =
@@ -156,6 +173,10 @@ public class Drive extends SubsystemBase {
                 (state) -> Logger.recordOutput("Drive/SysIdState", state.toString())),
             new SysIdRoutine.Mechanism(
                 (voltage) -> runCharacterization(voltage.in(Volts)), null, this));
+
+    poseEstimator =
+        new SwerveDrivePoseEstimator(
+            kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
   }
 
   @Override
@@ -212,6 +233,12 @@ public class Drive extends SubsystemBase {
 
       // Apply update
       poseEstimator.updateWithTime(sampleTimestamps[i], rawGyroRotation, modulePositions);
+      m_field.setRobotPose(poseEstimator.getEstimatedPosition());
+      if (SmartDashboard.getBoolean("Vision/force use limelight", false)) {
+        forceUpdateOdometryWithVision();
+      } else {
+        updateOdometryWithVision();
+      }
     }
 
     // Update gyro alert
@@ -252,6 +279,61 @@ public class Drive extends SubsystemBase {
   /** Stops the drive. */
   public void stop() {
     runVelocity(new ChassisSpeeds());
+  }
+
+  /**
+   * Provide the odometry a vision pose estimate, only if there is a trustworthy pose available.
+   *
+   * <p>Each time a vision pose is supplied, the odometry pose estimation will change a little,
+   * larger pose shifts will take multiple calls to complete.
+   */
+  public void updateOdometryWithVision() {
+    LimelightHelpers.SetRobotOrientation(
+        APRILTAG_FRONT_LIMELIGHT_NAME,
+        poseEstimator.getEstimatedPosition().getRotation().getDegrees(),
+        0,
+        0,
+        0,
+        0,
+        0);
+    LimelightHelpers.SetRobotOrientation(
+        APRILTAG_BACK_LIMELIGHT_NAME,
+        poseEstimator.getEstimatedPosition().getRotation().getDegrees(),
+        0,
+        0,
+        0,
+        0,
+        0);
+
+    PoseEstimate estimate = limelight.getTrustedPose();
+    if (estimate != null) {
+      boolean doRejectUpdate = false;
+      if (Math.abs(pigeon.getAngularVelocityZWorld().getValueAsDouble()) > 720) {
+        doRejectUpdate = true;
+      }
+      if (estimate.tagCount == 0) {
+        doRejectUpdate = true;
+      }
+      if (!doRejectUpdate) {
+        poseEstimator.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 99999999));
+        poseEstimator.addVisionMeasurement(estimate.pose, estimate.timestampSeconds);
+      }
+    }
+  }
+
+  /**
+   * Set the odometry using the current apriltag estimate, disregarding the pose trustworthyness.
+   *
+   * <p>You only need to run this once for it to take effect.
+   */
+  public void forceUpdateOdometryWithVision() {
+    PoseEstimate estimate = limelight.getTrustedPose();
+    if (estimate != null) {
+      setPose(estimate.pose);
+    } else {
+      System.err.println(
+          "No valid limelight estimate to reset from. (Drivetrain.forceUpdateOdometryWithVision)");
+    }
   }
 
   /**
