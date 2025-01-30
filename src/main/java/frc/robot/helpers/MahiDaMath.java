@@ -1,7 +1,12 @@
-package frc.robot.util;
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
+package frc.robot.helpers;
 
 import edu.wpi.first.math.geometry.Pose2d;
 
+/** Add your docs here. */
 public class MahiDaMath {
   /**
    * finds the absolute distance from the origin of any point on a 3d plane
@@ -24,6 +29,22 @@ public class MahiDaMath {
   public static Pose2d divideOnlyPos(Pose2d pose, Double scalar) {
     return new Pose2d(pose.getX() / scalar, pose.getY() / scalar, pose.getRotation());
   }
+  /**
+   * returns the minimum of two values, but treats any vaue that is 0 as 10,000
+   *
+   * @param value1
+   * @param value2
+   * @return
+   */
+  public static double minNotZero(double value1, double value2) {
+    if (value1 == 0) {
+      value1 = 10000;
+    }
+    if (value2 == 0) {
+      value2 = 10000;
+    }
+    return Math.min(value1, value2);
+  }
 
   /**
    * @param pose1
@@ -33,5 +54,15 @@ public class MahiDaMath {
   public static Pose2d addOnlyPosTogether(Pose2d pose1, Pose2d pose2) {
     return new Pose2d(
         pose1.getX() + pose2.getX(), pose1.getY() + pose2.getY(), pose1.getRotation());
+  }
+
+  public static Double getSmallest(Double a, Double b, Double c) {
+    // Replace null values with Double.MAX_VALUE (a very large number)
+    double valA = (a != null) ? a : Double.MAX_VALUE;
+    double valB = (b != null) ? b : Double.MAX_VALUE;
+    double valC = (c != null) ? c : Double.MAX_VALUE;
+
+    // Find the smallest value
+    return Math.min(valA, Math.min(valB, valC));
   }
 }
