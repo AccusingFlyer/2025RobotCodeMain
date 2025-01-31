@@ -330,7 +330,7 @@ public final class Constants {
     public static final double AprilTagHeight = 1.335;
   }
 
-  public final class ElevatorConstants{
+  public final class ElevatorConstants {
     public static final int ELEVATOR_MOTOR_1_ID = 13;
     public static final int ELEVATOR_MOTOR_2_ID = 14;
     public static final double HUMAN_PLAYER_STATION_MILLIMETERS = 2531;
@@ -342,7 +342,6 @@ public final class Constants {
     public static final double ELEVATOR_MILLIMETERS_TO_ROTATIONS = 2531;
     public static final double ELEVATOR_THRESHOLD = 2531;
   }
-
 
   public final class FieldConstants {
     // used for the autoAngleAtReefCommand

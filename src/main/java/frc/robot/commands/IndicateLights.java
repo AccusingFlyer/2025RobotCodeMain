@@ -4,7 +4,6 @@
 
 package frc.robot.commands;
 
-import frc.robot.subsystems.RobotState;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.Lights;
 
@@ -25,15 +24,15 @@ public class IndicateLights extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-      
-        lights.setBL(2,1,4);
-        lights.setBR(2,1,4);
-        //TODO adjust values plz
-      
-        lights.setFL(2,1,4);
-        lights.setFR(2,1,4);
-        //TODO adjust values :3
-      
+
+    lights.setBL(2, 1, 4);
+    lights.setBR(2, 1, 4);
+    // TODO adjust values plz
+
+    lights.setFL(2, 1, 4);
+    lights.setFR(2, 1, 4);
+    // TODO adjust values :3
+
   }
 
   // Called once the command ends or is interrupted.

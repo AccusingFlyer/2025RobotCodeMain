@@ -48,7 +48,7 @@
   "folder": "Quarter Pounder",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 150.42216131873866
+    "rotation": 150.0
   },
   "useDefaultConstraints": true
 }

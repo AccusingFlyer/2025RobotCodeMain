@@ -1,4 +1,3 @@
-
 package frc.robot.helpers;
 
 import edu.wpi.first.math.geometry.Pose2d;

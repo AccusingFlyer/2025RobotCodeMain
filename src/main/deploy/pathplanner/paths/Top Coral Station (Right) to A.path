@@ -16,12 +16,12 @@
     },
     {
       "anchor": {
-        "x": 3.2007172131147543,
-        "y": 4.222797131147541
+        "x": 3.201,
+        "y": 4.223
       },
       "prevControl": {
-        "x": 3.0123489766536413,
-        "y": 4.3871668591771575
+        "x": 3.0126317635388773,
+        "y": 4.387369728029617
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -92.86240522611182
+    "rotation": -90.0
   },
   "reversed": false,
   "folder": "Quarter Pounder",

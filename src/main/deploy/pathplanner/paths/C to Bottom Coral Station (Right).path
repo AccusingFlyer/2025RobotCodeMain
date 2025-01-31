@@ -48,7 +48,7 @@
   "folder": "Reverse Quarter Pounder",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 145.98065001017352
+    "rotation": 145.0
   },
   "useDefaultConstraints": true
 }
