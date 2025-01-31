@@ -15,6 +15,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.util.Units;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -29,7 +30,7 @@ public final class Constants {
   private Constants() {}
 
   public static final class DriveConstants {
-    public static final double BUMPER_TO_SENSOR = 100; // in milliqmeters
+    // in milliqmeters
     public static final Pose2d DRIVE_ODOMETRY_ORIGIN = new Pose2d(5.0, 5.0, new Rotation2d());
     /** The bumper-to-bumper width of the robot. */
     public static final double DRIVETRAIN_ROBOT_WIDTH_METERS = 0.83;
@@ -37,12 +38,13 @@ public final class Constants {
      * The left-to-right distance between the drivetrain wheels Should be measured from center to
      * center.
      */
-    public static final double DRIVETRAIN_TRACKWIDTH_METERS = 0.52705;
+    public static final double DRIVETRAIN_TRACKWIDTH_METERS = Units.inchesToMeters(28);
+
     /**
      * The front-to-back distance between the drivetrain wheels. Should be measured from center to
      * center.
      */
-    public static final double DRIVETRAIN_WHEELBASE_METERS = 0.52705;
+    public static final double DRIVETRAIN_WHEELBASE_METERS = Units.inchesToMeters(28);
 
     /** The diameter of the module's wheel in meters. */
     public static final double DRIVETRAIN_WHEEL_DIAMETER = 0.092; // 0.098;
@@ -125,7 +127,7 @@ public final class Constants {
                 -DRIVETRAIN_TRACKWIDTH_METERS / 2.0, -DRIVETRAIN_WHEELBASE_METERS / 2.0));
 
     public static final String DRIVETRAIN_SMARTDASHBOARD_TAB = "Drivetrain";
-    public static final String CANIVORE_DRIVETRAIN = "Swerve";
+    public static final String CANIVORE_DRIVETRAIN = "rio";
     public static final int DRIVETRAIN_PIGEON_ID = 0;
 
     public static final int FL_DRIVE_MOTOR_ID = 1;
@@ -327,6 +329,20 @@ public final class Constants {
     // height of april tags from the floor in meters
     public static final double AprilTagHeight = 1.335;
   }
+
+  public final class ElevatorConstants{
+    public static final int ELEVATOR_MOTOR_1_ID = 13;
+    public static final int ELEVATOR_MOTOR_2_ID = 14;
+    public static final double HUMAN_PLAYER_STATION_MILLIMETERS = 2531;
+    public static final double REEF_LEVEL_1_MILLIMETERS = 2531;
+    public static final double REEF_LEVEL_2_MILLIMETERS = 2531;
+    public static final double REEF_LEVEL_3_MILLIMETERS = 2531;
+    public static final double REEF_LEVEL_4_MILLIMETERS = 2531;
+    public static final double PROCESSOR_HEIGHT_MILLIMETERS = 2531;
+    public static final double ELEVATOR_MILLIMETERS_TO_ROTATIONS = 2531;
+    public static final double ELEVATOR_THRESHOLD = 2531;
+  }
+
 
   public final class FieldConstants {
     // used for the autoAngleAtReefCommand

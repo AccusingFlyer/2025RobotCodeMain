@@ -8,6 +8,7 @@ import static frc.robot.settings.Constants.DriveConstants.*;
 import static frc.robot.settings.Constants.xboxDriver.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.MathUtil;
@@ -25,17 +26,25 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Drive;
 import frc.robot.settings.Constants.Vision;
+import frc.robot.settings.ElevatorStates;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.Limelight;
+import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.Lights;
+import frc.robot.commands.IndicateLights;
+import frc.robot.commands.ElevatorCommand;
 import frc.robot.subsystems.RobotState;
 import java.io.IOException;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 /**
- * This class is where the bulk of the robot should be declared. Since Command-based is a
- * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
- * periodic methods (other than the scheduler calls). Instead, the structure of the robot (including
+ * This class is where the bulk of the robot should be declared. Since
+ * Command-based is a
+ * "declarative" paradigm, very little robot logic should actually be handled in
+ * the {@link Robot}
+ * periodic methods (other than the scheduler calls). Instead, the structure of
+ * the robot (including
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
@@ -46,15 +55,20 @@ public class RobotContainer {
   // we run the code.
 
   private final boolean DrivetrainExists = Preferences.getBoolean("DrivetrainExists", true);
+  private final boolean elevatorExists = Preferences.getBoolean("Elevator", true);
+  private final boolean lightsExist = Preferences.getBoolean("Lights Exist", true);
 
   private DrivetrainSubsystem driveTrain;
+  private ElevatorSubsystem elevator;
 
   private Drive defaultDriveCommand;
+  private ElevatorCommand elevatorDefaultCommand;
 
   private XboxController driverControllerXbox;
   private XboxController operatorControllerXbox;
 
   private Limelight limelight;
+  private Lights lights;
   private SendableChooser<Command> autoChooser;
   private PowerDistribution PDP;
 
@@ -78,14 +92,16 @@ public class RobotContainer {
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
-  /** The container for the robot. Contains subsystems, OI devices, and commands. */
+  /**
+   * The container for the robot. Contains subsystems, OI devices, and commands.
+   */
   public RobotContainer() {
     // preferences are initialized IF they don't already exist on the Rio
 
     Preferences.initBoolean("CompBot", true);
     Preferences.initBoolean("Use Limelight", true);
     Preferences.initBoolean("Xbox Controller", true);
-
+    Preferences.initBoolean("Elevator", false);
     Preferences.initBoolean("DrivetrainExists", false);
     Preferences.initBoolean("AntiTipActive", true);
 
@@ -100,12 +116,9 @@ public class RobotContainer {
     driverControllerXbox = new XboxController(DRIVE_CONTROLLER_ID);
     operatorControllerXbox = new XboxController(OPERATOR_CONTROLLER_ID);
 
-    ControllerXAxisSupplier =
-        () -> modifyAxis(-driverControllerXbox.getRawAxis(X_AXIS), DEADBAND_NORMAL);
-    ControllerYAxisSupplier =
-        () -> modifyAxis(-driverControllerXbox.getRawAxis(Y_AXIS), DEADBAND_NORMAL);
-    ControllerZAxisSupplier =
-        () -> modifyAxis(-driverControllerXbox.getRawAxis(Z_AXIS), DEADBAND_NORMAL);
+    ControllerXAxisSupplier = () -> modifyAxis(-driverControllerXbox.getRawAxis(X_AXIS), DEADBAND_NORMAL);
+    ControllerYAxisSupplier = () -> modifyAxis(-driverControllerXbox.getRawAxis(Y_AXIS), DEADBAND_NORMAL);
+    ControllerZAxisSupplier = () -> modifyAxis(-driverControllerXbox.getRawAxis(Z_AXIS), DEADBAND_NORMAL);
 
     ZeroGyroSup = driverControllerXbox::getStartButton;
     LeftReefLineupSup = driverControllerXbox::getLeftBumperButton;
@@ -114,7 +127,7 @@ public class RobotContainer {
     AlgaeIntakeSup = driverControllerXbox::getAButton; // TODO change to actual
     AlgaeShooterSup = driverControllerXbox::getXButton;
     CoralPlaceTeleSupplier = () -> driverControllerXbox.getPOV() == 0;
-    ;
+    
 
     ReefHeight1Supplier = () -> operatorControllerXbox.getPOV() == 0;
     ReefHeight2Supplier = () -> operatorControllerXbox.getPOV() == 90;
@@ -128,6 +141,9 @@ public class RobotContainer {
       driveTrainInst();
     }
 
+    if (lightsExist) {lightsInst();}
+    if (elevatorExists) {elevatorInst();}
+
     if (DrivetrainExists) {
       configureDriveTrain();
     }
@@ -138,13 +154,12 @@ public class RobotContainer {
   private void driveTrainInst() {
     driveTrain = new DrivetrainSubsystem();
 
-    defaultDriveCommand =
-        new Drive(
-            driveTrain,
-            () -> false,
-            ControllerXAxisSupplier,
-            ControllerYAxisSupplier,
-            ControllerZAxisSupplier);
+    defaultDriveCommand = new Drive(
+        driveTrain,
+        () -> false,
+        ControllerXAxisSupplier,
+        ControllerYAxisSupplier,
+        ControllerZAxisSupplier);
     driveTrain.setDefaultCommand(defaultDriveCommand);
   }
 
@@ -158,13 +173,29 @@ public class RobotContainer {
     limelight = Limelight.getInstance();
   }
 
+  private void lightsInst() {
+    lights = new Lights();
+    lights.setDefaultCommand(new IndicateLights(lights));
+  }
+
+  private void elevatorInst() {
+    elevator = new ElevatorSubsystem();
+    elevatorDefaultCommand = new ElevatorCommand(elevator,()-> ElevatorStates.HumanPlayer);
+  }
+
+
   /**
-   * Use this method to define your trigger->command mappings. Triggers can be created via the
-   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary
+   * Use this method to define your trigger->command mappings. Triggers can be
+   * created via the
+   * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with
+   * an arbitrary
    * predicate, or via the named factories in {@link
-   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for {@link
-   * CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
-   * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
+   * edu.wpi.first.wpilibj2.command.button.CommandGenericHID}'s subclasses for
+   * {@link
+   * CommandXboxController
+   * Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller
+   * PS4} controllers or
+   * {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
   private void configureBindings() {
@@ -173,16 +204,20 @@ public class RobotContainer {
 
       new Trigger(ZeroGyroSup).onTrue(new InstantCommand(driveTrain::zeroGyroscope));
 
-      InstantCommand setOffsets =
-          new InstantCommand(driveTrain::setEncoderOffsets) {
-            public boolean runsWhenDisabled() {
-              return true;
-            }
-            ;
-          };
+      InstantCommand setOffsets = new InstantCommand(driveTrain::setEncoderOffsets) {
+        public boolean runsWhenDisabled() {
+          return true;
+        };
+      };
 
       SmartDashboard.putData("set offsets", setOffsets);
       SmartDashboard.putData(new InstantCommand(driveTrain::forceUpdateOdometryWithVision));
+
+      new Trigger(ReefHeight1Supplier).onTrue(new InstantCommand(()->RobotState.getInstance().deliveringCoralHeight = ElevatorStates.Reef1));
+    new Trigger(ReefHeight2Supplier).onTrue(new InstantCommand(()->RobotState.getInstance().deliveringCoralHeight = ElevatorStates.Reef2));
+    new Trigger(ReefHeight3Supplier).onTrue(new InstantCommand(()->RobotState.getInstance().deliveringCoralHeight = ElevatorStates.Reef3));
+    new Trigger(ReefHeight4Supplier).onTrue(new InstantCommand(()->RobotState.getInstance().deliveringCoralHeight = ElevatorStates.Reef4));
+    new Trigger(CoralIntakeHeightSupplier).onTrue(new InstantCommand(()->RobotState.getInstance().deliveringCoralHeight = ElevatorStates.HumanPlayer));
     }
   }
 
@@ -199,8 +234,7 @@ public class RobotContainer {
     try {
       AutoBuilder.configure(
           driveTrain::getPose, // Pose2d supplier
-          driveTrain
-              ::resetOdometry, // Pose2d consumer, used to reset odometry at the beginning of auto
+          driveTrain::resetOdometry, // Pose2d consumer, used to reset odometry at the beginning of auto
           driveTrain::getChassisSpeeds,
           (speeds) -> driveTrain.drive(speeds),
           new PPHolonomicDriveController(
@@ -211,8 +245,8 @@ public class RobotContainer {
               new com.pathplanner.lib.config.PIDConstants(
                   k_THETA_P, k_THETA_I,
                   k_THETA_D) // PID constants to correct for rotation error (used to create the
-              // rotation controller)
-              ),
+          // rotation controller)
+          ),
           RobotConfig.fromGUISettings(),
           () -> DriverStation.getAlliance().get().equals(Alliance.Red),
           driveTrain);
@@ -240,7 +274,22 @@ public class RobotContainer {
     return value;
   }
 
-  private void registerNamedCommands() {}
+  private void registerNamedCommands() {
+    Command elevatorResetNamedCommand;
+
+    if(elevatorExists) {
+      elevatorResetNamedCommand = new InstantCommand(()->elevator.setElevatorPosition(ElevatorStates.HumanPlayer));
+    } else {
+      elevatorResetNamedCommand = new InstantCommand(()->System.out.println("attempted to create named command but subsytem did not exist"));
+    }
+
+
+    NamedCommands.registerCommand("ElevatorReset", elevatorResetNamedCommand);
+
+
+
+
+  }
 
   public void logPower() {
     for (int i = 0; i < 16; i++) {
@@ -248,7 +297,8 @@ public class RobotContainer {
     }
   }
 
-  public void teleopInit() {}
+  public void teleopInit() {
+  }
 
   public void teleopPeriodic() {
     if (DrivetrainExists) {
@@ -256,7 +306,8 @@ public class RobotContainer {
     }
   }
 
-  public void robotInit() {}
+  public void robotInit() {
+  }
 
   public void robotPeriodic() {
     currentAlliance = DriverStation.getAlliance().get();
@@ -274,7 +325,9 @@ public class RobotContainer {
     }
   }
 
-  public void disabledPeriodic() {}
+  public void disabledPeriodic() {
+  }
 
-  public void disabledInit() {}
+  public void disabledInit() {
+  }
 }

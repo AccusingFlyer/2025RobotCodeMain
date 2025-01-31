@@ -32,7 +32,7 @@ public class Limelight {
   static {
     try {
       FIELD_LAYOUT =
-          AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+          AprilTagFieldLayout.loadFromResource(AprilTagFields.k2025Reefscape.m_resourceFile);
       FIELD_LAYOUT.setOrigin(AprilTagFieldLayout.OriginPosition.kBlueAllianceWallRightSide);
     } catch (IOException e) {
       throw new RuntimeException(e);
