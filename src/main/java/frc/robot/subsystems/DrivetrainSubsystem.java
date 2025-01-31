@@ -21,8 +21,11 @@ import static frc.robot.settings.Constants.DriveConstants.FR_STEER_ENCODER_ID;
 import static frc.robot.settings.Constants.DriveConstants.FR_STEER_MOTOR_ID;
 import static frc.robot.settings.Constants.Vision.APRILTAG_BACK_LIMELIGHT;
 import static frc.robot.settings.Constants.Vision.APRILTAG_FRONT_LIMELIGHT;
-
+import frc.robot.helpers.AllianceFlipUtil;
+import edu.wpi.first.math.util.Units;
 import com.ctre.phoenix6.hardware.Pigeon2;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.PIDController;
@@ -41,6 +44,8 @@ import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
@@ -50,6 +55,7 @@ import java.util.Arrays;
 import java.util.Collections;
 // import java.util.logging.Logger;
 import org.littletonrobotics.junction.Logger;
+
 
 public class DrivetrainSubsystem extends SubsystemBase {
   // These are our swerve drive kinematics and Pigeon (gyroscope)
@@ -283,6 +289,25 @@ public class DrivetrainSubsystem extends SubsystemBase {
     setModule(1, new SwerveModuleState(0, Rotation2d.fromDegrees(135)));
     setModule(2, new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
     setModule(3, new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+  }
+
+
+  public Command goToPoint(int x, int y) {
+    Pose2d targetPose = new Pose2d(x, y, Rotation2d.fromDegrees(180));
+    PathConstraints constraints =
+        new PathConstraints(3.0, 1.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+    return AutoBuilder.pathfindToPose(targetPose, constraints);
+  }
+  /*
+   * flips if needed
+   */
+  public Command goToPoint(Pose2d pose) {
+    PathConstraints constraints =
+        new PathConstraints(3.0, 2.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+    return new ConditionalCommand(
+        AutoBuilder.pathfindToPoseFlipped(pose, constraints),
+        AutoBuilder.pathfindToPose(pose, constraints),
+        AllianceFlipUtil::shouldFlip);
   }
   /**
    * The function that actually lets us drive the robot.
