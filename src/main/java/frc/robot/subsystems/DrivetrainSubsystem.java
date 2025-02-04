@@ -284,12 +284,12 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
   }
   /** Points all of the wheels towards the center of the robot, making it harder to push. */
-  public void pointWheelsInward() {
-    setModule(0, new SwerveModuleState(0, Rotation2d.fromDegrees(-135)));
-    setModule(1, new SwerveModuleState(0, Rotation2d.fromDegrees(135)));
-    setModule(2, new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
-    setModule(3, new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
-  }
+  // public void pointWheelsInward() {
+  //   setModule(0, new SwerveModuleState(0, Rotation2d.fromDegrees(-135)));
+  //   setModule(1, new SwerveModuleState(0, Rotation2d.fromDegrees(135)));
+  //   setModule(2, new SwerveModuleState(0, Rotation2d.fromDegrees(-45)));
+  //   setModule(3, new SwerveModuleState(0, Rotation2d.fromDegrees(45)));
+  // }
 
   public Command goToPoint(int x, int y) {
     Pose2d targetPose = new Pose2d(x, y, Rotation2d.fromDegrees(180));
@@ -314,22 +314,22 @@ public class DrivetrainSubsystem extends SubsystemBase {
    * @param chassisSpeeds the desired speed and direction
    */
   public void drive(ChassisSpeeds chassisSpeeds) {
-    if (Preferences.getBoolean("AntiTipActive", false)) {
-      if (pigeon.getRoll().getValueAsDouble() > 3) {
-        chassisSpeeds.vxMetersPerSecond =
-            chassisSpeeds.vxMetersPerSecond + (pigeon.getRoll().getValueAsDouble() / 10);
-      } else if (pigeon.getRoll().getValueAsDouble() < -3) {
-        chassisSpeeds.vxMetersPerSecond =
-            chassisSpeeds.vxMetersPerSecond + (-pigeon.getRoll().getValueAsDouble() / 10);
-      }
-      if (pigeon.getPitch().getValueAsDouble() > 3) {
-        chassisSpeeds.vyMetersPerSecond =
-            chassisSpeeds.vyMetersPerSecond + (pigeon.getPitch().getValueAsDouble() / 10);
-      } else if (pigeon.getPitch().getValueAsDouble() < -3) {
-        chassisSpeeds.vyMetersPerSecond =
-            chassisSpeeds.vyMetersPerSecond + (-pigeon.getPitch().getValueAsDouble() / 10);
-      }
-    }
+    // if (Preferences.getBoolean("AntiTipActive", false)) {
+    //   if (pigeon.getRoll().getValueAsDouble() > 3) {
+    //     chassisSpeeds.vxMetersPerSecond =
+    //         chassisSpeeds.vxMetersPerSecond + (pigeon.getRoll().getValueAsDouble() / 10);
+    //   } else if (pigeon.getRoll().getValueAsDouble() < -3) {
+    //     chassisSpeeds.vxMetersPerSecond =
+    //         chassisSpeeds.vxMetersPerSecond + (-pigeon.getRoll().getValueAsDouble() / 10);
+    //   }
+    //   if (pigeon.getPitch().getValueAsDouble() > 3) {
+    //     chassisSpeeds.vyMetersPerSecond =
+    //         chassisSpeeds.vyMetersPerSecond + (pigeon.getPitch().getValueAsDouble() / 10);
+    //   } else if (pigeon.getPitch().getValueAsDouble() < -3) {
+    //     chassisSpeeds.vyMetersPerSecond =
+    //         chassisSpeeds.vyMetersPerSecond + (-pigeon.getPitch().getValueAsDouble() / 10);
+    //   }
+    // }
 
     SwerveModuleState[] desiredStates =
         kinematics.toSwerveModuleStates(ChassisSpeeds.discretize(chassisSpeeds, 0.02));

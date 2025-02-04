@@ -55,7 +55,7 @@ public final class Constants {
      * about these.
      */
     public static final double DRIVETRAIN_DRIVE_REDUCTION =
-        (15.0 / 50.0) * (28.0 / 16.0) * (15.0 / 45.0);
+        (16.0 / 50.0) * (27.0 / 17.0) * (15.0 / 45.0);
 
     /**
      * Whether the drive motor should be counterclockwise or clockwise positive. If there is an odd
@@ -67,7 +67,8 @@ public final class Constants {
      * The overall steer reduction of the module. Multiplying motor rotations by this value should
      * result in wheel rotations.
      */
-    public static final double DRIVETRAIN_STEER_REDUCTION = (14.0 / 50.0) * (10.0 / 60.0);
+    public static final double DRIVETRAIN_STEER_REDUCTION =
+        0.05333333333; // (14.0 / 50.0) * (10.0 / 60.0);
 
     /**
      * Whether the steer motor should be counterclockwise or clockwise positive. If there is an odd
@@ -128,37 +129,37 @@ public final class Constants {
 
     public static final String DRIVETRAIN_SMARTDASHBOARD_TAB = "Drivetrain";
     public static final String CANIVORE_DRIVETRAIN = "rio";
-    public static final int DRIVETRAIN_PIGEON_ID = 0;
+    public static final int DRIVETRAIN_PIGEON_ID = 13;
 
-    public static final int FL_DRIVE_MOTOR_ID = 1;
+    public static final int FL_DRIVE_MOTOR_ID = 0;
     public static final int FL_STEER_MOTOR_ID = 2;
-    public static final int FL_STEER_ENCODER_ID = 1;
-    public static final Rotation2d FL_STEER_OFFSET = Rotation2d.fromRotations(0.272217);
+    public static final int FL_STEER_ENCODER_ID = 6;
+    public static final Rotation2d FL_STEER_OFFSET = Rotation2d.fromRotations(0.0);
 
-    public static final int FR_DRIVE_MOTOR_ID = 3;
+    public static final int FR_DRIVE_MOTOR_ID = 5;
     public static final int FR_STEER_MOTOR_ID = 4;
-    public static final int FR_STEER_ENCODER_ID = 2;
-    public static final Rotation2d FR_STEER_OFFSET = Rotation2d.fromRotations(0.41333);
+    public static final int FR_STEER_ENCODER_ID = 3;
+    public static final Rotation2d FR_STEER_OFFSET = Rotation2d.fromRotations(0.0);
 
-    public static final int BL_DRIVE_MOTOR_ID = 5;
-    public static final int BL_STEER_MOTOR_ID = 6;
-    public static final int BL_STEER_ENCODER_ID = 3;
-    public static final Rotation2d BL_STEER_OFFSET = Rotation2d.fromRotations(-0.11792);
+    public static final int BL_DRIVE_MOTOR_ID = 7;
+    public static final int BL_STEER_MOTOR_ID = 8;
+    public static final int BL_STEER_ENCODER_ID = 12;
+    public static final Rotation2d BL_STEER_OFFSET = Rotation2d.fromRotations(0.0);
 
-    public static final int BR_DRIVE_MOTOR_ID = 7;
-    public static final int BR_STEER_MOTOR_ID = 8;
-    public static final int BR_STEER_ENCODER_ID = 4;
-    public static final Rotation2d BR_STEER_OFFSET = Rotation2d.fromRotations(0.403809);
+    public static final int BR_DRIVE_MOTOR_ID = 10;
+    public static final int BR_STEER_MOTOR_ID = 11;
+    public static final int BR_STEER_ENCODER_ID = 9;
+    public static final Rotation2d BR_STEER_OFFSET = Rotation2d.fromRotations(0.0);
 
     // Drive Motor
-    public static final double k_DRIVE_P = 0.03;
+    public static final double k_DRIVE_P = 0.001;
     public static final double k_DRIVE_I = 0;
     public static final double k_DRIVE_D = 0;
     public static final double k_DRIVE_FF_S = 0;
     public static final double k_DRIVE_FF_V = 0;
     public static final double DRIVE_DEADBAND_MPS = 0.01;
-    public static final double DRIVE_MOTOR_RAMP = 0.1;
-    public static final double DRIVE_CURRENT_LIMIT = 30;
+    public static final double DRIVE_MOTOR_RAMP = 0.01;
+    public static final double DRIVE_CURRENT_LIMIT = 15;
 
     // Steer Motor
     /**
@@ -175,7 +176,7 @@ public final class Constants {
      */
     public static final double MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 2 * Math.PI;
 
-    public static final double k_STEER_P = 8;
+    public static final double k_STEER_P = 0.0;
     public static final double k_STEER_I = 0;
     public static final double k_STEER_D = 0;
     public static final double k_STEER_FF_S = 0.0;
@@ -237,7 +238,7 @@ public final class Constants {
       TalonFXConfiguration steerMotorConfig = new TalonFXConfiguration();
       steerMotorConfig.Feedback.RotorToSensorRatio = 1 / DriveConstants.DRIVETRAIN_STEER_REDUCTION;
       steerMotorConfig.MotorOutput.Inverted = DriveConstants.DRIVETRAIN_STEER_INVERTED;
-      // steerMotorConfig.MotorOutput.DutyCycleNeutralDeadband = 0.05;
+      steerMotorConfig.MotorOutput.DutyCycleNeutralDeadband = 0.05;
       steerMotorConfig.Slot0.kP = DriveConstants.k_STEER_P;
       steerMotorConfig.Slot0.kI = DriveConstants.k_STEER_I;
       steerMotorConfig.Slot0.kD = DriveConstants.k_STEER_D;
@@ -278,29 +279,30 @@ public final class Constants {
     public static final int DRIVE_CONTROLLER_ID = 0;
     public static final int OPERATOR_CONTROLLER_ID = 1;
     /**
-     * Left stick Y-axis.
+     * Left stick X-axis.
      *
      * <p>Left = -1 || Right = 1
      */
-    public static final int X_AXIS = 0;
+    public static final int X_AXIS = 1;
+    ;
     /**
-     * Left stick X-axis.
+     * Left stick Y-axis.
      *
      * <p>Forwards = -1 || Backwards = 1
      */
-    public static final int Y_AXIS = 1;
+    public static final int Y_AXIS = 0;
     /**
      * Right stick Z-axis.
      *
      * <p>Left = -1 || Right = 1
      */
-    public static final int Z_AXIS = 2;
+    public static final int Z_AXIS = 4;
     /**
      * Right stick Z-rotate.
      *
      * <p>Forwards = -1 || Backwards = 1
      */
-    public static final int Z_ROTATE = 5;
+    public static final int Z_ROTATE = 4;
     /** Value used to differentiate between angle 0 and rest position. */
     public static final double NO_INPUT = 404;
 
@@ -331,8 +333,8 @@ public final class Constants {
   }
 
   public final class ElevatorConstants {
-    public static final int ELEVATOR_MOTOR_1_ID = 13;
-    public static final int ELEVATOR_MOTOR_2_ID = 14;
+    public static final int ELEVATOR_MOTOR_1_ID = 20;
+    public static final int ELEVATOR_MOTOR_2_ID = 21;
     public static final double HUMAN_PLAYER_STATION_MILLIMETERS = 2531;
     public static final double REEF_LEVEL_1_MILLIMETERS = 2531;
     public static final double REEF_LEVEL_2_MILLIMETERS = 2531;
