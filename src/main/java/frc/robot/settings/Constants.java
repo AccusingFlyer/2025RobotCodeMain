@@ -33,7 +33,7 @@ public final class Constants {
     // in milliqmeters
     public static final Pose2d DRIVE_ODOMETRY_ORIGIN = new Pose2d(5.0, 5.0, new Rotation2d());
     /** The bumper-to-bumper width of the robot. */
-    public static final double DRIVETRAIN_ROBOT_WIDTH_METERS = 0.83;
+    public static final double DRIVETRAIN_ROBOT_WIDTH_METERS = 0.711;
     /**
      * The left-to-right distance between the drivetrain wheels Should be measured from center to
      * center.
@@ -134,25 +134,25 @@ public final class Constants {
     public static final int FL_DRIVE_MOTOR_ID = 0;
     public static final int FL_STEER_MOTOR_ID = 2;
     public static final int FL_STEER_ENCODER_ID = 6;
-    public static final Rotation2d FL_STEER_OFFSET = Rotation2d.fromRotations(0.0);
+    public static final Rotation2d FL_STEER_OFFSET = Rotation2d.fromRotations(34.189453125);
 
     public static final int FR_DRIVE_MOTOR_ID = 5;
     public static final int FR_STEER_MOTOR_ID = 4;
-    public static final int FR_STEER_ENCODER_ID = 3;
-    public static final Rotation2d FR_STEER_OFFSET = Rotation2d.fromRotations(0.0);
+    public static final int FR_STEER_ENCODER_ID = 9;
+    public static final Rotation2d FR_STEER_OFFSET = Rotation2d.fromRotations(62.1386719);
 
-    public static final int BL_DRIVE_MOTOR_ID = 7;
-    public static final int BL_STEER_MOTOR_ID = 8;
+    public static final int BL_DRIVE_MOTOR_ID = 10;
+    public static final int BL_STEER_MOTOR_ID = 11;
     public static final int BL_STEER_ENCODER_ID = 12;
-    public static final Rotation2d BL_STEER_OFFSET = Rotation2d.fromRotations(0.0);
+    public static final Rotation2d BL_STEER_OFFSET = Rotation2d.fromRotations(349.804688);
 
-    public static final int BR_DRIVE_MOTOR_ID = 10;
-    public static final int BR_STEER_MOTOR_ID = 11;
-    public static final int BR_STEER_ENCODER_ID = 9;
-    public static final Rotation2d BR_STEER_OFFSET = Rotation2d.fromRotations(0.0);
+    public static final int BR_DRIVE_MOTOR_ID = 7;
+    public static final int BR_STEER_MOTOR_ID = 8;
+    public static final int BR_STEER_ENCODER_ID = 3;
+    public static final Rotation2d BR_STEER_OFFSET = Rotation2d.fromRotations(-140.712890625);
 
     // Drive Motor
-    public static final double k_DRIVE_P = 0.001;
+    public static final double k_DRIVE_P = 0.01;
     public static final double k_DRIVE_I = 0;
     public static final double k_DRIVE_D = 0;
     public static final double k_DRIVE_FF_S = 0;
@@ -176,7 +176,7 @@ public final class Constants {
      */
     public static final double MAX_STEER_ACCELERATION_RADIANS_PER_SECOND_SQUARED = 2 * Math.PI;
 
-    public static final double k_STEER_P = 0.0;
+    public static final double k_STEER_P = 0.2;
     public static final double k_STEER_I = 0;
     public static final double k_STEER_D = 0;
     public static final double k_STEER_FF_S = 0.0;

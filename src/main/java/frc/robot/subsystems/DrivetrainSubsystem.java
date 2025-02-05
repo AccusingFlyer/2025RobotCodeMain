@@ -109,7 +109,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             FL_DRIVE_MOTOR_ID,
             FL_STEER_MOTOR_ID,
             FL_STEER_ENCODER_ID,
-            Rotation2d.fromRotations(Preferences.getDouble("FL offset", 0)),
+            Rotation2d.fromRotations(-97.294921875),
             CANIVORE_DRIVETRAIN);
     modules[1] =
         new SwerveModule(
@@ -117,7 +117,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             FR_DRIVE_MOTOR_ID,
             FR_STEER_MOTOR_ID,
             FR_STEER_ENCODER_ID,
-            Rotation2d.fromRotations(Preferences.getDouble("FR offset", 0)),
+            Rotation2d.fromRotations(61.87499999999),
             CANIVORE_DRIVETRAIN);
     modules[2] =
         new SwerveModule(
@@ -125,7 +125,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BL_DRIVE_MOTOR_ID,
             BL_STEER_MOTOR_ID,
             BL_STEER_ENCODER_ID,
-            Rotation2d.fromRotations(Preferences.getDouble("BL offset", 0)),
+            Rotation2d.fromRotations(-114.697265625),
             CANIVORE_DRIVETRAIN);
     modules[3] =
         new SwerveModule(
@@ -133,7 +133,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             BR_DRIVE_MOTOR_ID,
             BR_STEER_MOTOR_ID,
             BR_STEER_ENCODER_ID,
-            Rotation2d.fromRotations(Preferences.getDouble("BR offset", 0)),
+            Rotation2d.fromRotations(-152.2265625),
             CANIVORE_DRIVETRAIN);
 
     DataLog log = DataLogManager.getLog();
@@ -444,6 +444,22 @@ public class DrivetrainSubsystem extends SubsystemBase {
       RobotState.getInstance().LimelightsUpdated = false;
     }
 
+    SmartDashboard.putNumber(
+        "Mod " + modules[0] + " FL CANcoder", modules[0].getRotation().getDegrees());
+    SmartDashboard.putNumber(
+        "Mod " + modules[1] + " FR CANcoder", modules[1].getRotation().getDegrees());
+    SmartDashboard.putNumber(
+        "Mod " + modules[2] + " BL CANcoder", modules[2].getRotation().getDegrees());
+    SmartDashboard.putNumber(
+        "Mod " + modules[3] + " BR CANcoder", modules[3].getRotation().getDegrees());
+    SmartDashboard.putNumber(
+        "Mod " + modules[0] + " Angle", modules[0].getPosition().angle.getDegrees());
+    SmartDashboard.putNumber(
+        "Mod " + modules[1] + " Angle", modules[1].getPosition().angle.getDegrees());
+    SmartDashboard.putNumber(
+        "Mod " + modules[2] + " Angle", modules[2].getPosition().angle.getDegrees());
+    SmartDashboard.putNumber(
+        "Mod " + modules[3] + " Angle", modules[3].getPosition().angle.getDegrees());
     m_field.setRobotPose(odometer.getEstimatedPosition());
     RobotState.getInstance().odometerOrientation = getOdometryRotation().getDegrees();
     // updates logging for all drive motors on the swerve modules
