@@ -1,90 +1,46 @@
 package frc.robot.commands;
 
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.settings.Constants.DriveConstants;
+import frc.robot.settings.Constants;
 import frc.robot.subsystems.DrivetrainSubsystem;
-import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 public class Drive extends Command {
+  private DrivetrainSubsystem s_Swerve;
+  private DoubleSupplier translationSup;
+  private DoubleSupplier strafeSup;
+  private DoubleSupplier rotationSup;
+  private boolean robotCentricSup;
 
-  private final DrivetrainSubsystem drivetrain;
-  private final BooleanSupplier robotCentricMode;
-  private final DoubleSupplier translationXSupplier;
-  private final DoubleSupplier translationYSupplier;
-  private final DoubleSupplier rotationSupplier;
-  private int invert;
-
-  /**
-   * drives the robot at a specific forward velocity, sideways velocity, and rotational velocity.
-   *
-   * @param drivetrainSubsystem Swerve drive subsytem
-   * @param robotCentricMode while this is pressed, the robot will drive in RobotCentric mode.
-   *     Otherwise, it will default to field centric
-   * @param translationXSupplier forward throttle (from -1 to 1). 1 will drive at full speed forward
-   * @param translationYSupplier sideways throttle (from -1 to 1). 1 will drive at full speed to the
-   *     right
-   * @param rotationSupplier rotational throttle (from -1 to 1). 1 will drive at full speed
-   *     clockwise
-   */
   public Drive(
-      DrivetrainSubsystem drivetrainSubsystem,
-      BooleanSupplier robotCentricMode,
-      DoubleSupplier translationXSupplier,
-      DoubleSupplier translationYSupplier,
-      DoubleSupplier rotationSupplier) {
-    this.drivetrain = drivetrainSubsystem;
-    this.robotCentricMode = robotCentricMode;
-    this.translationXSupplier = translationXSupplier;
-    this.translationYSupplier = translationYSupplier;
-    this.rotationSupplier = rotationSupplier;
-    addRequirements(drivetrainSubsystem);
+      DrivetrainSubsystem s_Swerve,
+      DoubleSupplier translationSup,
+      DoubleSupplier strafeSup,
+      DoubleSupplier rotationSup,
+      boolean robotCentricSup) {
+    this.s_Swerve = s_Swerve;
+    addRequirements(s_Swerve);
+
+    this.translationSup = translationSup;
+    this.strafeSup = strafeSup;
+    this.rotationSup = rotationSup;
+    this.robotCentricSup = robotCentricSup;
   }
 
   @Override
   public void execute() {
-    // You can use `new ChassisSpeeds(...)` for robot-oriented movement instead of
-    // field-oriented
-    // movement
-    if (DriverStation.getAlliance().get() == Alliance.Red) {
-      invert = -1;
-    } else {
-      invert = 1;
-    }
-    // The two statements are mostly identical, taking X, Y, and Rotation suppliers
-    // and multiplying them by maximum velocties and inversions
-    // The only difference is that one is relative to the field, and the other to the robot.
-    if (robotCentricMode.getAsBoolean()) {
-      drivetrain.drive(
-          new ChassisSpeeds(
-              translationXSupplier.getAsDouble()
-                  * DriveConstants.MAX_VELOCITY_METERS_PER_SECOND
-                  * invert,
-              translationYSupplier.getAsDouble()
-                  * DriveConstants.MAX_VELOCITY_METERS_PER_SECOND
-                  * invert,
-              rotationSupplier.getAsDouble()
-                  * DriveConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND));
-    } else {
-      drivetrain.drive(
-          ChassisSpeeds.fromFieldRelativeSpeeds(
-              translationXSupplier.getAsDouble()
-                  * DriveConstants.MAX_VELOCITY_METERS_PER_SECOND
-                  * invert,
-              translationYSupplier.getAsDouble()
-                  * DriveConstants.MAX_VELOCITY_METERS_PER_SECOND
-                  * invert,
-              rotationSupplier.getAsDouble()
-                  * DriveConstants.MAX_ANGULAR_VELOCITY_RADIANS_PER_SECOND,
-              drivetrain.getPose().getRotation()));
-    }
-  }
+    /* Get Values, Deadband*/
+    double translationVal = MathUtil.applyDeadband(translationSup.getAsDouble(), 0.1);
+    double strafeVal = MathUtil.applyDeadband(strafeSup.getAsDouble(), 0.1);
+    double rotationVal = MathUtil.applyDeadband(rotationSup.getAsDouble(), 0.1);
 
-  @Override
-  public void end(boolean interrupted) {
-    drivetrain.drive(new ChassisSpeeds(0.0, 0.0, 0.0));
+    /* Drive */
+    s_Swerve.drive(
+        new Translation2d(translationVal, strafeVal).times(Constants.DriveConstants.maxSpeed),
+        rotationVal * Constants.DriveConstants.maxAngularVelocity,
+        !robotCentricSup,
+        true);
   }
 }

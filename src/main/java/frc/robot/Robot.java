@@ -4,17 +4,9 @@
 
 package frc.robot;
 
-import edu.wpi.first.wpilibj.PowerDistribution;
-import edu.wpi.first.wpilibj.PowerDistribution.ModuleType;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import java.io.File;
-import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
-import org.littletonrobotics.junction.Logger;
-import org.littletonrobotics.junction.networktables.NT4Publisher;
-import org.littletonrobotics.junction.wpilog.WPILOGReader;
-import org.littletonrobotics.junction.wpilog.WPILOGWriter;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -37,44 +29,6 @@ public class Robot extends LoggedRobot {
     // and put our
     // autonomous chooser on the dashboard.
 
-    Logger.recordMetadata("ProjectName", "MyProject"); // Set a metadata value
-
-    if (isReal()) {
-      // the following indented code is from ChatGPT, and checks if a USB stick is pluged in. If it
-      // can locate the USB
-      // stick then it adds it as a data reciever, otherwise it doesn't add the usb stick, and
-      // instead downloads files to home/lvuser/logs
-      String usbPath = "/U";
-      File usbDrive = new File(usbPath);
-      if (usbDrive.exists() && usbDrive.isDirectory()) {
-        Logger.addDataReceiver(new WPILOGWriter()); // Log to USB stick ("/U/logs")
-        System.out.println("USB drive detected. Logging to: " + usbPath + "/logs");
-      } else {
-        // Handle missing USB case
-        System.err.println("USB drive not detected. Logging disabled.");
-        // Optionally, you can log to an alternative location or skip logging
-        // For example, log to internal storage
-        Logger.addDataReceiver(new WPILOGWriter("/home/lvuser/logs"));
-      }
-      Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-      new PowerDistribution(1, ModuleType.kRev); // Enables power distribution logging
-    } else {
-      setUseTiming(false); // Run as fast as possible
-      String logPath =
-          LogFileUtil
-              .findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
-      Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-      Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
-      Logger.addDataReceiver(
-          new WPILOGWriter(
-              LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
-    }
-
-    // Logger.disableDeterministicTimestamps() // See "Deterministic Timestamps" in
-    // the
-    // "Understanding Data Flow" page
-    Logger.start(); // Start logging! No more data receivers, replay sources, or metadata values may
-    // be added.
     m_robotContainer = new RobotContainer();
     m_robotContainer.robotInit();
   }

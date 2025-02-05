@@ -98,6 +98,7 @@ public class RobotContainer {
   DoubleSupplier ControllerYAxisSupplier;
   DoubleSupplier ControllerXAxisSupplier;
   DoubleSupplier ControllerZAxisSupplier;
+  boolean RightStickSupplier;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
@@ -126,8 +127,9 @@ public class RobotContainer {
     ControllerXAxisSupplier = () -> -driverControllerXbox.getRawAxis(X_AXIS);
     ControllerYAxisSupplier = () -> -driverControllerXbox.getRawAxis(Y_AXIS);
     ControllerZAxisSupplier = () -> -driverControllerXbox.getRawAxis(Z_AXIS);
+    RightStickSupplier = driverControllerXbox.getRightStickButton();
 
-    ZeroGyroSup = operatorControllerXbox::getStartButton;
+    ZeroGyroSup = driverControllerXbox::getStartButton;
     LeftReefLineupSup = driverControllerXbox::getLeftBumperButton;
     RightReefLineupSup = driverControllerXbox::getRightBumperButton;
     SlowFrontSup = () -> driverControllerXbox.getRightTriggerAxis() > 0.1;
@@ -171,9 +173,8 @@ public class RobotContainer {
 
     driveTrainInst();
 
-    if (lightsExist) {
-      lightsInst();
-    }
+    lightsInst();
+
     if (elevatorExists) {
       elevatorInst();
     }
@@ -190,10 +191,10 @@ public class RobotContainer {
     defaultDriveCommand =
         new Drive(
             driveTrain,
-            () -> false,
             ControllerXAxisSupplier, // 1
             ControllerYAxisSupplier, // 0
-            ControllerZAxisSupplier); // 4
+            ControllerZAxisSupplier, // 4
+            RightStickSupplier);
     driveTrain.setDefaultCommand(defaultDriveCommand);
   }
 
@@ -230,18 +231,9 @@ public class RobotContainer {
 
     SmartDashboard.putData("drivetrain", driveTrain);
 
-    new Trigger(ZeroGyroSup).onTrue(new InstantCommand(driveTrain::zeroGyroscope));
+    new Trigger(ZeroGyroSup).onTrue(new InstantCommand(driveTrain::zeroHeading));
 
-    InstantCommand setOffsets =
-        new InstantCommand(driveTrain::setEncoderOffsets) {
-          public boolean runsWhenDisabled() {
-            return true;
-          }
-          ;
-        };
-
-    SmartDashboard.putData("set offsets", setOffsets);
-    SmartDashboard.putData(new InstantCommand(driveTrain::forceUpdateOdometryWithVision));
+    // SmartDashboard.putData(new InstantCommand(driveTrain::forceUpdateOdometryWithVision));
 
     new Trigger(ReefHeight1Supplier)
         .onTrue(
@@ -263,18 +255,18 @@ public class RobotContainer {
         .onTrue(
             new InstantCommand(
                 () -> RobotState.getInstance().deliveringCoralHeight = ElevatorStates.HumanPlayer));
-    new Trigger(ReefA).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.A));
-    new Trigger(ReefB).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.B));
-    new Trigger(ReefC).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.C));
-    new Trigger(ReefD).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.D));
-    new Trigger(ReefE).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.E));
-    new Trigger(ReefF).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.F));
-    new Trigger(ReefG).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.G));
-    new Trigger(ReefH).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.H));
-    new Trigger(ReefI).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.I));
-    new Trigger(ReefJ).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.J));
-    new Trigger(ReefK).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.K));
-    new Trigger(ReefL).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.L));
+    // new Trigger(ReefA).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.A));
+    // new Trigger(ReefB).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.B));
+    // new Trigger(ReefC).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.C));
+    // new Trigger(ReefD).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.D));
+    // new Trigger(ReefE).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.E));
+    // new Trigger(ReefF).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.F));
+    // new Trigger(ReefG).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.G));
+    // new Trigger(ReefH).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.H));
+    // new Trigger(ReefI).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.I));
+    // new Trigger(ReefJ).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.J));
+    // new Trigger(ReefK).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.K));
+    // new Trigger(ReefL).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.L));
   }
 
   // Schedule `exampleMethodCommand` when the Xbox controller's B button is
@@ -290,10 +282,9 @@ public class RobotContainer {
     try {
       AutoBuilder.configure(
           driveTrain::getPose, // Pose2d supplier
-          driveTrain
-              ::resetOdometry, // Pose2d consumer, used to reset odometry at the beginning of auto
+          driveTrain::zeroPose, // Pose2d consumer, used to reset odometry at the beginning of auto
           driveTrain::getChassisSpeeds,
-          (speeds) -> driveTrain.drive(speeds),
+          driveTrain::setChassisSpeeds,
           new PPHolonomicDriveController(
               new com.pathplanner.lib.config.PIDConstants(
                   k_XY_P, k_XY_I,
