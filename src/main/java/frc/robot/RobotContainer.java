@@ -126,7 +126,7 @@ public class RobotContainer {
 
     ControllerXAxisSupplier = () -> -driverControllerXbox.getRawAxis(X_AXIS);
     ControllerYAxisSupplier = () -> -driverControllerXbox.getRawAxis(Y_AXIS);
-    ControllerZAxisSupplier = () -> -driverControllerXbox.getRawAxis(Z_AXIS);
+    ControllerZAxisSupplier = () -> driverControllerXbox.getRawAxis(Z_AXIS);
     RightStickSupplier = driverControllerXbox.getRightStickButton();
 
     ZeroGyroSup = driverControllerXbox::getStartButton;
