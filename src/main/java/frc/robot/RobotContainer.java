@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -233,7 +234,8 @@ public class RobotContainer {
 
     new Trigger(ZeroGyroSup).onTrue(new InstantCommand(driveTrain::zeroHeading));
 
-    // SmartDashboard.putData(new InstantCommand(driveTrain::forceUpdateOdometryWithVision));
+    // SmartDashboard.putData(new
+    // InstantCommand(driveTrain::forceUpdateOdometryWithVision));
 
     new Trigger(ReefHeight1Supplier)
         .onTrue(
@@ -255,18 +257,18 @@ public class RobotContainer {
         .onTrue(
             new InstantCommand(
                 () -> RobotState.getInstance().deliveringCoralHeight = ElevatorStates.HumanPlayer));
-    // new Trigger(ReefA).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.A));
-    // new Trigger(ReefB).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.B));
-    // new Trigger(ReefC).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.C));
-    // new Trigger(ReefD).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.D));
-    // new Trigger(ReefE).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.E));
-    // new Trigger(ReefF).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.F));
-    // new Trigger(ReefG).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.G));
-    // new Trigger(ReefH).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.H));
-    // new Trigger(ReefI).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.I));
-    // new Trigger(ReefJ).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.J));
-    // new Trigger(ReefK).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.K));
-    // new Trigger(ReefL).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.L));
+    new Trigger(ReefA).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.A));
+    new Trigger(ReefB).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.B));
+    new Trigger(ReefC).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.C));
+    new Trigger(ReefD).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.D));
+    new Trigger(ReefE).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.E));
+    new Trigger(ReefF).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.F));
+    new Trigger(ReefG).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.G));
+    new Trigger(ReefH).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.H));
+    new Trigger(ReefI).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.I));
+    new Trigger(ReefJ).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.J));
+    new Trigger(ReefK).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.K));
+    new Trigger(ReefL).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.L));
   }
 
   // Schedule `exampleMethodCommand` when the Xbox controller's B button is
@@ -309,6 +311,8 @@ public class RobotContainer {
     // An example command will be run in autonomous
     return autoChooser.getSelected();
   }
+
+  
 
   public void autonomousInit() {
     SmartDashboard.putNumber("autos ran", SmartDashboard.getNumber("autos ran", 0) + 1);
@@ -364,10 +368,13 @@ public class RobotContainer {
       limelight.updateLoggingWithPoses();
       SmartDashboard.putBoolean(
           "LIMELIGHT/isConnectedFront",
-          Limelight.getInstance().isConnected(Vision.APRILTAG_FRONT_LIMELIGHT));
+          Limelight.getInstance().isConnected(Vision.APRILTAG_LIMELIGHTA_NAME));
       SmartDashboard.putBoolean(
           "LIMELIGHT/isConnectedBack",
-          Limelight.getInstance().isConnected(Vision.APRILTAG_BACK_LIMELIGHT));
+          Limelight.getInstance().isConnected(Vision.APRILTAG_LIMELIGHTB_NAME));
+      SmartDashboard.putBoolean(
+          "LIMELIGHT/isConnectedC",
+          Limelight.getInstance().isConnected(Vision.APRILTAG_LIMELIGHTC_NAME));
     }
   }
 

@@ -39,7 +39,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 new CurrentLimitsConfigs()
                     .withSupplyCurrentLimit(100)
                     .withSupplyCurrentLimitEnable(true));
-    // We are not yet sure on whether or not we are using MotionMagic.
+    
     // .withMotionMagic(new MotionMagicConfigs()
     // .withMotionMagicAcceleration(2491)
     // .withMotionMagicCruiseVelocity(2491)
@@ -72,13 +72,13 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     logMotors();
-    if (elevatorHallEffect1.get()) {
-      elevatorMotor1.setPosition(0);
-    }
+    // if (elevatorHallEffect1.get()) {
+    //   elevatorMotor1.setPosition(0);
+    // }
 
-    if (elevatorHallEffect2.get()) {
-      elevatorMotor2.setPosition(0);
-    }
+    // if (elevatorHallEffect2.get()) {
+    //   elevatorMotor2.setPosition(0);
+    // }
 
     SmartDashboard.putNumber("Left Elevator", getEncoderLeft());
     SmartDashboard.putNumber("Right Elevator", getEncoderRight());

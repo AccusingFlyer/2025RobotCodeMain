@@ -11,6 +11,7 @@ import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.path.PathConstraints;
+import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
@@ -169,6 +170,8 @@ public final class Constants {
 
     public static final PathConstraints DEFAULT_PATH_CONSTRAINTS =
         new PathConstraints(2, 1.5, Math.toRadians(360), Math.toRadians(360));
+
+    public static final Pose2d DRIVE_ODOMETRY_ORIGIN = new Pose2d(5.0, 5.0, new Rotation2d());
   }
 
   public static final class CTREConfigs {
@@ -302,9 +305,9 @@ public final class Constants {
   public final class Field {}
 
   public final class Vision {
-    public static final String APRILTAG_FRONT_LIMELIGHT = "limelight-aprilf";
-    public static final String APRILTAG_BACK_LIMELIGHT = "limelight-aprilb";
-    public static final String OBJ_DETECTION_LIMELIGHT_NAME = "limelight-neural";
+    public static final String APRILTAG_LIMELIGHTA_NAME = "limelight-aprilf";
+    public static final String APRILTAG_LIMELIGHTB_NAME = "limelight-aprilb";
+    public static final String APRILTAG_LIMELIGHTC_NAME = "limelight-neural";
 
     public static final String LIMELIGHT_SHUFFLEBOARD_TAB = "Vision";
 
@@ -332,6 +335,12 @@ public final class Constants {
     public static final double PROCESSOR_HEIGHT_MILLIMETERS = 2531;
     public static final double ELEVATOR_MILLIMETERS_TO_ROTATIONS = 2531;
     public static final double ELEVATOR_THRESHOLD = 2531;
+  }
+
+  public final class EndEffectorConstants {
+    public static final int EFFECTOR_MOTOR_1_ID = 30;
+    public static final int EFFECTOR_MOTOR_2_ID = 31;
+    
   }
 
   public final class FieldConstants {
