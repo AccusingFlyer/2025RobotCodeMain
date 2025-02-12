@@ -41,9 +41,9 @@ public class ElevatorSubsystem extends SubsystemBase {
                     .withSupplyCurrentLimitEnable(true));
 
     // .withMotionMagic(new MotionMagicConfigs()
-    // .withMotionMagicAcceleration(2491)
-    // .withMotionMagicCruiseVelocity(2491)
-    // .withMotionMagicJerk(2491));
+    // .withMotionMagicAcceleration(2531)
+    // .withMotionMagicCruiseVelocity(2531)
+    // .withMotionMagicJerk(2531));
     elevatorMotor1.getConfigurator().apply(eleMotorConfig);
     elevatorMotor2.getConfigurator().apply(eleMotorConfig);
     elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
@@ -72,13 +72,13 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void periodic() {
     // This method will be called once per scheduler run
     logMotors();
-    // if (elevatorHallEffect1.get()) {
-    //   elevatorMotor1.setPosition(0);
-    // }
+    if (elevatorHallEffect1.get()) {
+      elevatorMotor1.setPosition(0);
+    }
 
-    // if (elevatorHallEffect2.get()) {
-    //   elevatorMotor2.setPosition(0);
-    // }
+    if (elevatorHallEffect2.get()) {
+      elevatorMotor2.setPosition(0);
+    }
 
     SmartDashboard.putNumber("Left Elevator", getEncoderLeft());
     SmartDashboard.putNumber("Right Elevator", getEncoderRight());

@@ -22,14 +22,19 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.Drive;
 import frc.robot.commands.ElevatorCommand;
+import frc.robot.commands.intake.IntakePowerCommand;
+import frc.robot.commands.intake.IntakeSetpointCommand;
 import frc.robot.settings.Constants.Vision;
+import frc.robot.settings.Constants;
 import frc.robot.settings.ElevatorStates;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+import frc.robot.subsystems.Intake;
 import frc.robot.subsystems.Lights;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.RobotState;
@@ -51,11 +56,11 @@ public class RobotContainer {
   // we run the code.
 
   private final boolean DrivetrainExists = Preferences.getBoolean("DrivetrainExists", true);
-  private final boolean elevatorExists = Preferences.getBoolean("Elevator", true);
-  private final boolean lightsExist = Preferences.getBoolean("Lights Exist", true);
+  
 
   private DrivetrainSubsystem driveTrain;
   private ElevatorSubsystem elevator;
+  private Intake intake;
 
   private Drive defaultDriveCommand;
   private ElevatorCommand elevatorDefaultCommand;
@@ -82,18 +87,18 @@ public class RobotContainer {
   BooleanSupplier ReefHeight4Supplier;
   BooleanSupplier CoralPlaceTeleSupplier;
   BooleanSupplier CoralIntakeHeightSupplier;
-  BooleanSupplier ReefA;
-  BooleanSupplier ReefB;
-  BooleanSupplier ReefC;
-  BooleanSupplier ReefD;
-  BooleanSupplier ReefE;
-  BooleanSupplier ReefF;
-  BooleanSupplier ReefL;
-  BooleanSupplier ReefK;
-  BooleanSupplier ReefJ;
-  BooleanSupplier ReefI;
-  BooleanSupplier ReefH;
-  BooleanSupplier ReefG;
+  // BooleanSupplier ReefA;
+  // BooleanSupplier ReefB;
+  // BooleanSupplier ReefC;
+  // BooleanSupplier ReefD;
+  // BooleanSupplier ReefE;
+  // BooleanSupplier ReefF;
+  // BooleanSupplier ReefL;
+  // BooleanSupplier ReefK;
+  // BooleanSupplier ReefJ;
+  // BooleanSupplier ReefI;
+  // BooleanSupplier ReefH;
+  // BooleanSupplier ReefG;
   DoubleSupplier ControllerYAxisSupplier;
   DoubleSupplier ControllerXAxisSupplier;
   DoubleSupplier ControllerZAxisSupplier;
@@ -105,11 +110,7 @@ public class RobotContainer {
   public RobotContainer() {
     // preferences are initialized IF they don't already exist on the Rio
 
-    Preferences.initBoolean("CompBot", true);
-    Preferences.initBoolean("Use Limelight", true);
-    Preferences.initBoolean("Xbox Controller", true);
-    Preferences.initBoolean("Elevator", false);
-    Preferences.initBoolean("DrivetrainExists", true);
+    
     Preferences.initBoolean("AntiTipActive", false);
 
     DataLogManager.start(); // Start logging
@@ -131,8 +132,8 @@ public class RobotContainer {
     ZeroGyroSup = driverControllerXbox::getStartButton;
     LeftReefLineupSup = driverControllerXbox::getLeftBumperButton;
     RightReefLineupSup = driverControllerXbox::getRightBumperButton;
-    SlowFrontSup = () -> driverControllerXbox.getRightTriggerAxis() > 0.1;
-    AlgaeIntakeSup = driverControllerXbox::getAButton; // TODO change to actual
+    AlgaeIntakeSup = () ->
+             (driverControllerXbox.getRightTriggerAxis() > 0.1);
     AlgaeShooterSup = driverControllerXbox::getXButton;
     CoralPlaceTeleSupplier = () -> driverControllerXbox.getPOV() == 0;
 
@@ -140,32 +141,32 @@ public class RobotContainer {
     ReefHeight2Supplier = () -> driverControllerXbox.getPOV() == 90;
     ReefHeight3Supplier = () -> driverControllerXbox.getPOV() == 180;
     ReefHeight4Supplier = () -> driverControllerXbox.getPOV() == 270;
-    ReefA =
-        () ->
-            (driverControllerXbox.getRightTriggerAxis() > 0.1)
-                && driverControllerXbox.getLeftBumperButton();
-    ;
-    ReefB =
-        () ->
-            (driverControllerXbox.getRightTriggerAxis() > 0.1)
-                && driverControllerXbox.getRightBumperButton();
-    ;
-    ReefC = () -> driverControllerXbox.getAButton() && driverControllerXbox.getLeftBumperButton();
-    ReefD = () -> driverControllerXbox.getAButton() && driverControllerXbox.getRightBumperButton();
-    ReefE = () -> driverControllerXbox.getBButton() && driverControllerXbox.getLeftBumperButton();
-    ReefF = () -> driverControllerXbox.getBButton() && driverControllerXbox.getRightBumperButton();
-    ReefL = () -> driverControllerXbox.getXButton() && driverControllerXbox.getRightBumperButton();
-    ReefK = () -> driverControllerXbox.getXButton() && driverControllerXbox.getLeftBumperButton();
-    ReefJ = () -> driverControllerXbox.getYButton() && driverControllerXbox.getRightBumperButton();
-    ReefI = () -> driverControllerXbox.getYButton() && driverControllerXbox.getLeftBumperButton();
-    ReefH =
-        () ->
-            (driverControllerXbox.getLeftTriggerAxis() > 0.1)
-                && driverControllerXbox.getLeftBumperButton();
-    ReefG =
-        () ->
-            (driverControllerXbox.getLeftTriggerAxis() > 0.1)
-                && driverControllerXbox.getRightBumperButton();
+    // ReefA =
+    //     () ->
+    //         (driverControllerXbox.getRightTriggerAxis() > 0.1)
+    //             && driverControllerXbox.getLeftBumperButton();
+    // ;
+    // ReefB =
+    //     () ->
+    //         (driverControllerXbox.getRightTriggerAxis() > 0.1)
+    //             && driverControllerXbox.getRightBumperButton();
+    // ;
+    // ReefC = () -> driverControllerXbox.getAButton() && driverControllerXbox.getLeftBumperButton();
+    // ReefD = () -> driverControllerXbox.getAButton() && driverControllerXbox.getRightBumperButton();
+    // ReefE = () -> driverControllerXbox.getBButton() && driverControllerXbox.getLeftBumperButton();
+    // ReefF = () -> driverControllerXbox.getBButton() && driverControllerXbox.getRightBumperButton();
+    // ReefL = () -> driverControllerXbox.getXButton() && driverControllerXbox.getRightBumperButton();
+    // ReefK = () -> driverControllerXbox.getXButton() && driverControllerXbox.getLeftBumperButton();
+    // ReefJ = () -> driverControllerXbox.getYButton() && driverControllerXbox.getRightBumperButton();
+    // ReefI = () -> driverControllerXbox.getYButton() && driverControllerXbox.getLeftBumperButton();
+    // ReefH =
+    //     () ->
+    //         (driverControllerXbox.getLeftTriggerAxis() > 0.1)
+    //             && driverControllerXbox.getLeftBumperButton();
+    // ReefG =
+    //     () ->
+    //         (driverControllerXbox.getLeftTriggerAxis() > 0.1)
+    //             && driverControllerXbox.getRightBumperButton();
     CoralIntakeHeightSupplier = () -> operatorControllerXbox.getStartButton();
 
     limelightInit();
@@ -174,9 +175,8 @@ public class RobotContainer {
 
     lightsInst();
 
-    if (elevatorExists) {
-      elevatorInst();
-    }
+    elevatorInst();
+
 
     configureDriveTrain();
 
@@ -255,18 +255,20 @@ public class RobotContainer {
         .onTrue(
             new InstantCommand(
                 () -> RobotState.getInstance().deliveringCoralHeight = ElevatorStates.HumanPlayer));
-    new Trigger(ReefA).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.A));
-    new Trigger(ReefB).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.B));
-    new Trigger(ReefC).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.C));
-    new Trigger(ReefD).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.D));
-    new Trigger(ReefE).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.E));
-    new Trigger(ReefF).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.F));
-    new Trigger(ReefG).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.G));
-    new Trigger(ReefH).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.H));
-    new Trigger(ReefI).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.I));
-    new Trigger(ReefJ).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.J));
-    new Trigger(ReefK).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.K));
-    new Trigger(ReefL).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.L));
+    // new Trigger(ReefA).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.A));
+    // new Trigger(ReefB).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.B));
+    // new Trigger(ReefC).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.C));
+    // new Trigger(ReefD).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.D));
+    // new Trigger(ReefE).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.E));
+    // new Trigger(ReefF).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.F));
+    // new Trigger(ReefG).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.G));
+    // new Trigger(ReefH).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.H));
+    // new Trigger(ReefI).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.I));
+    // new Trigger(ReefJ).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.J));
+    // new Trigger(ReefK).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.K));
+    // new Trigger(ReefL).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.L));
+
+    new Trigger(AlgaeIntakeSup).onTrue(new ParallelCommandGroup(new IntakeSetpointCommand(intake, Constants.IntakeConstants.GROUND_ALGAE_INTAKE_SETPOINT), new IntakePowerCommand(intake, -3.5)));
   }
 
   // Schedule `exampleMethodCommand` when the Xbox controller's B button is
@@ -325,17 +327,10 @@ public class RobotContainer {
   private void registerNamedCommands() {
     Command elevatorResetNamedCommand;
 
-    if (elevatorExists) {
+    
       elevatorResetNamedCommand =
           new InstantCommand(() -> elevator.setElevatorPosition(ElevatorStates.HumanPlayer));
-    } else {
-      elevatorResetNamedCommand =
-          new InstantCommand(
-              () ->
-                  System.out.println(
-                      "attempted to create named command but subsytem did not exist"));
-    }
-
+    
     NamedCommands.registerCommand("ElevatorReset", elevatorResetNamedCommand);
   }
 
@@ -348,9 +343,9 @@ public class RobotContainer {
   public void teleopInit() {}
 
   public void teleopPeriodic() {
-    if (DrivetrainExists) {
-      SmartDashboard.putData(driveTrain.getCurrentCommand());
-    }
+    
+    SmartDashboard.putData(driveTrain.getCurrentCommand());
+    
   }
 
   public void robotInit() {}

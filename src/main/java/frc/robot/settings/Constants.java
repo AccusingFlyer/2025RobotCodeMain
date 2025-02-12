@@ -349,6 +349,8 @@ public final class Constants {
     public static final int PIVOT_MOTOR_2_ID = 51;
     public static final int PIVOT_MOTOR_3_ID = 52;
     public static final int INTAKE_SPIN_MOTOR_ID = 53;
+
+    public static final int GROUND_ALGAE_INTAKE_SETPOINT = 2531;
   }
 
   public final class FieldConstants {
