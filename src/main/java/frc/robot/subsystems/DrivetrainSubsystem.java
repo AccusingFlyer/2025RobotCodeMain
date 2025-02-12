@@ -18,7 +18,6 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
-import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,6 +27,7 @@ import frc.robot.LimelightHelpers;
 import frc.robot.LimelightHelpers.PoseEstimate;
 import frc.robot.helpers.AllianceFlipUtil;
 import frc.robot.settings.Constants;
+import org.littletonrobotics.junction.Logger;
 
 public class DrivetrainSubsystem extends SubsystemBase {
   public SwerveDriveOdometry swerveOdometry;
@@ -74,7 +74,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
     SmartDashboard.putBoolean("Vision/force use limelight", false);
   } // <-- Added missing closing brace for the constructor
 
-
   public Command goToPoint(int x, int y) {
     Pose2d targetPose = new Pose2d(x, y, Rotation2d.fromDegrees(180));
     PathConstraints constraints =
@@ -92,8 +91,6 @@ public class DrivetrainSubsystem extends SubsystemBase {
         AutoBuilder.pathfindToPose(pose, constraints),
         AllianceFlipUtil::shouldFlip);
   }
-
-  
 
   public void drive(
       Translation2d translation, double rotation, boolean fieldRelative, Boolean isOpenLoop) {
@@ -180,6 +177,26 @@ public class DrivetrainSubsystem extends SubsystemBase {
 
   public Rotation2d getHeading() {
     return getPose().getRotation();
+  }
+
+  /*
+   * Logs important data for the drivetrain
+   */
+  private void logDrivetrainData() {
+    SmartDashboard.putNumber("DRIVETRAIN/Robot Angle", getOdometryRotation().getDegrees());
+    SmartDashboard.putString("DRIVETRAIN/Robot Location", getPose().getTranslation().toString());
+    // SmartDashboard.putString("DRIVETRAIN/Position", getPose());
+    SmartDashboard.putNumber("DRIVETRAIN/forward speed", getChassisSpeeds().vxMetersPerSecond);
+    SmartDashboard.putNumber(
+        "DRIVETRAIN/rotational speed", Math.toDegrees(getChassisSpeeds().omegaRadiansPerSecond));
+    SmartDashboard.putNumber(
+        "DRIVETRAIN/gyroscope rotation degrees", getPose().getRotation().getDegrees());
+    SmartDashboard.putNumber(
+        "DRIVETRAIN/degrees per second", Math.toDegrees(getChassisSpeeds().omegaRadiansPerSecond));
+
+    Logger.recordOutput("MyStates", getModuleStates());
+    Logger.recordOutput("Position", odometer.getEstimatedPosition());
+    Logger.recordOutput("Gyro", getGyroscopeRotation());
   }
 
   public void setHeading(Rotation2d heading) {
@@ -348,6 +365,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     m_field.setRobotPose(odometer.getEstimatedPosition());
+    logDrivetrainData();
     RobotState.getInstance().odometerOrientation = getOdometryRotation().getDegrees();
   }
 }

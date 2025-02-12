@@ -1,70 +1,163 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.package
-// frc.robot.subsystems;import edu.wpi.first.wpilibj2.command.SubsystemBase;
 package frc.robot.subsystems;
 
-import edu.wpi.first.wpilibj.AddressableLED;
-import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import com.ctre.phoenix.led.Animation;
+import com.ctre.phoenix.led.CANdle;
+import com.ctre.phoenix.led.CANdle.LEDStripType;
+import com.ctre.phoenix.led.CANdleConfiguration;
+import com.ctre.phoenix.led.ColorFlowAnimation;
+import com.ctre.phoenix.led.ColorFlowAnimation.Direction;
+import com.ctre.phoenix.led.FireAnimation;
+import com.ctre.phoenix.led.LarsonAnimation;
+import com.ctre.phoenix.led.LarsonAnimation.BounceMode;
+import com.ctre.phoenix.led.RainbowAnimation;
+import com.ctre.phoenix.led.SingleFadeAnimation;
+import com.ctre.phoenix.led.StrobeAnimation;
+import edu.wpi.first.wpilibj.util.Color;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.settings.Constants;
 
 public class Lights extends SubsystemBase {
-  /** Creates a new SubsystemLights. */
-  private AddressableLED lights;
 
-  private AddressableLEDBuffer LEDBuffer;
+  private static final CANdle candle = new CANdle(Constants.candleID);
 
-  public Lights() { // dummy values below
-    lights = new AddressableLED(6);
-    LEDBuffer = new AddressableLEDBuffer(60);
-    lights.setLength(60);
+  public static final Color black = new Color(0, 0, 0);
+  public static final Color yellow = new Color(242, 60, 0);
+  public static final Color purple = new Color(184, 0, 185);
+  public static final Color white = new Color(255, 230, 220);
+  public static final Color green = new Color(56, 209, 0);
+  public static final Color blue = new Color(8, 32, 255);
+  public static final Color red = new Color(255, 0, 0);
+  public static final Color orange = new Color(227, 110, 7);
+
+  public Lights() {
+    CANdleConfiguration config = new CANdleConfiguration();
+    config.statusLedOffWhenActive = false;
+    config.stripType = LEDStripType.GRB;
+    config.v5Enabled = true;
+    config.vBatOutputMode = CANdle.VBatOutputMode.Modulated;
+    config.brightnessScalar = 0.5;
+    candle.configAllSettings(config, 100);
+    candle.configLEDType(LEDStripType.GRB); // just added this after cd post
+
+    setDefaultCommand(defaultCommand());
+
+    System.out.println("Candle Initialized");
   }
 
-  public void dataSetter() {
-    lights.setData(LEDBuffer);
-    lights.start();
-  }
-  /**
-   * @param index the number (from 0 to max) of the LED to set
-   * @param R
-   * @param G
-   * @param B
-   */
-  public void setOneLightRGB(int index, int R, int G, int B) {
-    LEDBuffer.setRGB(index, R, G, B);
+  public Command defaultCommand() {
+    return runOnce(
+        () -> {
+          LEDSegment.MainStrip.fullClear();
+          LEDSegment.InternalLEDs.fullClear();
+
+          LEDSegment.MainStrip.setColor(purple);
+          LEDSegment.InternalLEDs.setColor(purple);
+          // LEDSegment.MainStrip.setFireAnimation(0.5, 0.25, 0.25);
+
+          LEDSegment.MainStrip.setFlowAnimation(purple, 0.5);
+        });
   }
 
-  public void setLights(int start, int end, int R, int G, int B) {
-    for (int i = start; i < end; i++) {
-      setOneLightRGB(i, R, G, B);
+  public static enum LEDSegment {
+    InternalLEDs(0, 8, 0),
+    MainStrip(8, 68, 1);
+    // start index is what LED to start on, 0-7 are the candles onboard LEDS, beyond is the strip
+
+    public final int startIndex;
+    public final int segmentSize;
+    public final int animationSlot;
+
+    private LEDSegment(int startIndex, int segmentSize, int animationSlot) {
+      this.startIndex = startIndex;
+      this.segmentSize = segmentSize;
+      this.animationSlot = animationSlot;
     }
-  }
-  /** turns the lights off */
-  public void lightsOut() {
-    setLights(0, LEDBuffer.getLength(), 0, 0, 0);
+
+    public void setColor(Color color) {
+      clearAnimation();
+      candle.setLEDs(color.red, color.green, color.blue, 0, startIndex, segmentSize);
+      System.out.println("setting color to" + color.red + color.blue + color.green);
+    }
+
+    private void setAnimation(Animation animation) {
+      candle.animate(animation, animationSlot);
+    }
+
+    public void fullClear() {
+      clearAnimation();
+      disableLEDs();
+    }
+
+    public void clearAnimation() {
+      candle.clearAnimation(animationSlot);
+    }
+
+    public void disableLEDs() {
+      setColor(black);
+    }
+
+    public void setFlowAnimation(Color color, double speed) {
+      setAnimation(
+          new ColorFlowAnimation(
+              color.red,
+              color.green,
+              color.blue,
+              0,
+              speed,
+              segmentSize,
+              Direction.Forward,
+              startIndex));
+      System.out.println("Flow animation set");
+    }
+
+    public void setFadeAnimation(Color color, double speed) {
+      setAnimation(
+          new SingleFadeAnimation(
+              color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
+      System.out.println("fade animation set");
+    }
+
+    public void setBandAnimation(Color color, double speed) {
+      setAnimation(
+          new LarsonAnimation(
+              color.red,
+              color.green,
+              color.blue,
+              0,
+              speed,
+              segmentSize,
+              BounceMode.Front,
+              3,
+              startIndex));
+    }
+
+    public void setStrobeAnimation(Color color, double speed) {
+      setAnimation(
+          new StrobeAnimation(
+              color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
+    }
+
+    public void setRainbowAnimation(double speed) {
+      setAnimation(new RainbowAnimation(1, speed, segmentSize, false, startIndex));
+    }
+
+    public void setFireAnimation(double speed, double cooling, double sparking) {
+      setAnimation(new FireAnimation(1, speed, segmentSize, cooling, sparking));
+    }
+
+    public void setDefaultLEDColors() {}
   }
 
-  // TODO: adjust start/end values
-  public void setFR(int R, int G, int B) {
-    setLights(25, 31, R, G, B);
-  }
+  public static class Color {
+    public int red;
+    public int green;
+    public int blue;
 
-  public void setFL(int R, int G, int B) {
-    setLights(25, 31, R, G, B);
-  }
-
-  public void setBR(int R, int G, int B) {
-    setLights(25, 31, R, G, B);
-  }
-
-  public void setBL(int R, int G, int B) {
-    setLights(25, 31, R, G, B);
-  }
-  // TODO: adjust start/end values
-
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    dataSetter();
+    public Color(int red, int green, int blue) {
+      this.red = red;
+      this.green = green;
+      this.blue = blue;
+    }
   }
 }

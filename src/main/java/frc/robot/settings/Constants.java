@@ -29,6 +29,8 @@ public final class Constants {
 
   private Constants() {}
 
+  public static final int candleID = 40;
+
   public static final class DriveConstants {
     public static final int pigeonID = 13;
 
@@ -114,7 +116,7 @@ public final class Constants {
       public static final int driveMotorID = 0;
       public static final int angleMotorID = 2;
       public static final int canCoderID = 6;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(35.771484375);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(36.73);
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
@@ -136,7 +138,7 @@ public final class Constants {
       public static final int angleMotorID = 11;
       public static final int canCoderID = 12;
       // public static final Rotation2d angleOffset = Rotation2d.fromDegrees(-66.1816475);
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(-151);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(-145.5);
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
@@ -146,7 +148,7 @@ public final class Constants {
       public static final int driveMotorID = 7;
       public static final int angleMotorID = 8;
       public static final int canCoderID = 3;
-      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(170);
+      public static final Rotation2d angleOffset = Rotation2d.fromDegrees(167.6);
       public static final SwerveModuleConstants constants =
           new SwerveModuleConstants(driveMotorID, angleMotorID, canCoderID, angleOffset);
     }
@@ -305,9 +307,9 @@ public final class Constants {
   public final class Field {}
 
   public final class Vision {
-    public static final String APRILTAG_LIMELIGHTA_NAME = "limelight-aprilf";
-    public static final String APRILTAG_LIMELIGHTB_NAME = "limelight-aprilb";
-    public static final String APRILTAG_LIMELIGHTC_NAME = "limelight-neural";
+    public static final String APRILTAG_LIMELIGHTA_NAME = "limelight-a";
+    public static final String APRILTAG_LIMELIGHTB_NAME = "limelight-b";
+    public static final String APRILTAG_LIMELIGHTC_NAME = "limelight-c";
 
     public static final String LIMELIGHT_SHUFFLEBOARD_TAB = "Vision";
 
@@ -340,7 +342,13 @@ public final class Constants {
   public final class EndEffectorConstants {
     public static final int EFFECTOR_MOTOR_1_ID = 30;
     public static final int EFFECTOR_MOTOR_2_ID = 31;
-    
+  }
+
+  public final class IntakeConstants {
+    public static final int PIVOT_MOTOR_1_ID = 50;
+    public static final int PIVOT_MOTOR_2_ID = 51;
+    public static final int PIVOT_MOTOR_3_ID = 52;
+    public static final int INTAKE_SPIN_MOTOR_ID = 53;
   }
 
   public final class FieldConstants {

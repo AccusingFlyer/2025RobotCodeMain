@@ -10,7 +10,7 @@ import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -39,7 +39,7 @@ public class ElevatorSubsystem extends SubsystemBase {
                 new CurrentLimitsConfigs()
                     .withSupplyCurrentLimit(100)
                     .withSupplyCurrentLimitEnable(true));
-    
+
     // .withMotionMagic(new MotionMagicConfigs()
     // .withMotionMagicAcceleration(2491)
     // .withMotionMagicCruiseVelocity(2491)
@@ -89,10 +89,9 @@ public class ElevatorSubsystem extends SubsystemBase {
    * @param height double that controls how many millimeters from the distance sensor
    */
   public void setElevatorPosition(double height) {
-    double position = height * ELEVATOR_MILLIMETERS_TO_ROTATIONS;
-    double uPos = position + zeroPoint;
-    PositionVoltage voltReq = new PositionVoltage(0);
-    elevatorMotor1.setControl(voltReq.withPosition(uPos));
+
+    final MotionMagicVoltage request = new MotionMagicVoltage(0);
+    elevatorMotor1.setControl(request.withPosition(height));
   }
 
   public void setElevatorPosition(ElevatorStates height) {
