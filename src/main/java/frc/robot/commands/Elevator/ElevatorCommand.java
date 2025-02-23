@@ -14,8 +14,10 @@ public class ElevatorCommand extends Command {
 
   private double height;
 
-  private PIDController pidController1 = new PIDController(0.025, 0.0, 0);
-  private PIDController pidController2 = new PIDController(0.025, 0.0, 0);
+  // private PIDController pidController1 = new PIDController(0.025, 0.0, 0);
+  // private PIDController pidController2 = new PIDController(0.025, 0.0, 0);
+  private PIDController pidController = new PIDController(0.025, 0.0, 0.01);
+
   /**
    * Creates a new ElevatorCommand.
    *
@@ -28,26 +30,40 @@ public class ElevatorCommand extends Command {
     addRequirements(elevator);
     // Use addRequirements() here to declare subsystem dependencies.
 
-    pidController1.setIZone(30);
-    pidController2.setIZone(30);
-    pidController1.setSetpoint(height);
-    pidController2.setSetpoint(height);
+    // pidController1.setIZone(30);
+    // pidController2.setIZone(30);
+
+    pidController.setIZone(30);
+
+    pidController.setSetpoint(height);
+    // pidController1.setSetpoint(height);
+    // pidController2.setSetpoint(height);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    pidController1.reset();
-    pidController2.reset();
+    // pidController1.reset();
+    // pidController2.reset();
+    
+    pidController.reset();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    double speed1 = pidController1.calculate(-elevator.getEncoderLeft(), height);
-    double speed2 = pidController2.calculate(elevator.getEncoderRight(), height);
+    // double speed1 = pidController1.calculate(-elevator.getEncoderLeft(), height);
+    // double speed2 = pidController2.calculate(elevator.getEncoderRight(), height);
 
-    elevator.setMotors(speed1, speed2);
+    double averagePosition = (((-elevator.getEncoderLeft()) + elevator.getEncoderRight()) / 2.0);
+
+    double speed = pidController.calculate(averagePosition, height);
+
+    System.out.println("PID Output (Speed): " + speed);
+
+    elevator.setMotors(speed, speed);
+
+    
   }
 
   // Called once the command ends or is interrupted.
@@ -59,6 +75,8 @@ public class ElevatorCommand extends Command {
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return pidController1.atSetpoint() && pidController2.atSetpoint();
+    // return pidController1.atSetpoint() && pidController2.atSetpoint();
+
+    return pidController.atSetpoint();
   }
 }

@@ -330,7 +330,7 @@ public final class Constants {
     public static final int ELEVATOR_MOTOR_1_ID = 20;
     public static final int ELEVATOR_MOTOR_2_ID = 21;
     public static final double HUMAN_PLAYER_STATION_MILLIMETERS = 5;
-    public static final double REEF_LEVEL_1_MILLIMETERS = 5; // 23.5
+    public static final double REEF_LEVEL_1_MILLIMETERS = 6; // 23.5
     public static final double REEF_LEVEL_2_MILLIMETERS = 5;
     public static final double REEF_LEVEL_3_MILLIMETERS = 5;
     public static final double REEF_LEVEL_4_MILLIMETERS = 5;

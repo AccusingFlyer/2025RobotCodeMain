@@ -29,7 +29,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorMotor1 = new TalonFX(ELEVATOR_MOTOR_1_ID);
     elevatorMotor2 = new TalonFX(ELEVATOR_MOTOR_2_ID);
 
-    // var talonFXConfigs = new TalonFXConfiguration();
+    var talonFXConfigs = new TalonFXConfiguration();
 
     elevatorMotor1.setNeutralMode(NeutralModeValue.Brake);
     elevatorMotor2.setNeutralMode(NeutralModeValue.Brake);
@@ -52,9 +52,14 @@ public class ElevatorSubsystem extends SubsystemBase {
     // // .withMotionMagicAcceleration(2531)
     // // .withMotionMagicCruiseVelocity(2531)
     // // .withMotionMagicJerk(2531));
-    // elevatorMotor1.getConfigurator().apply(talonFXConfigs);
+
     // elevatorMotor2.getConfigurator().apply(talonFXConfigs);
     // elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
+    // elevatorMotor2.getConfigurator().apply(talonFXConfigs);
+
+    talonFXConfigs.Feedback.SensorToMechanismRatio = 4.375;
+    elevatorMotor2.getConfigurator().apply(talonFXConfigs);
+    elevatorMotor1.getConfigurator().apply(talonFXConfigs);
 
     motorLogger1 = new MotorLogger("/elevator/motor1");
     motorLogger2 = new MotorLogger("/elevator/motor2");
@@ -118,16 +123,13 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   public void stopElevator() {
     elevatorMotor1.set(0);
+    elevatorMotor2.set(0);
   }
 
   public void zeroMotorEncoders() {
     elevatorMotor1.setPosition(0);
     elevatorMotor2.setPosition(0);
-    
-    
   }
-
-  
 
   @Override
   public void periodic() {
