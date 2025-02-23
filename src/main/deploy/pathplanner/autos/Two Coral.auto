@@ -1,0 +1,31 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Top Start to I"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "I to Top Coral Station (Right)"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Top Coral Station (Right) to K"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": "2 coral",
+  "choreoAuto": false
+}

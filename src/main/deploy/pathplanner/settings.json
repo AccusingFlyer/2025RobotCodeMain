@@ -11,9 +11,10 @@
   "autoFolders": [
     "1 coral",
     "2 coral",
+    "3 coral",
     "Quarter Pounders"
   ],
-  "defaultMaxVel": 5.2,
+  "defaultMaxVel": 4.5,
   "defaultMaxAccel": 3.0,
   "defaultMaxAngVel": 540.0,
   "defaultMaxAngAccel": 880.0,

@@ -34,35 +34,58 @@ public class Lights extends SubsystemBase {
     CANdleConfiguration config = new CANdleConfiguration();
     config.statusLedOffWhenActive = false;
     config.stripType = LEDStripType.GRB;
-    config.v5Enabled = true;
-    config.vBatOutputMode = CANdle.VBatOutputMode.Modulated;
+    config.v5Enabled = false;
+    config.vBatOutputMode = CANdle.VBatOutputMode.On;
     config.brightnessScalar = 0.5;
     candle.configAllSettings(config, 100);
     candle.configLEDType(LEDStripType.GRB); // just added this after cd post
 
-    setDefaultCommand(defaultCommand());
+    // setDefaultCommand(defaultCommand());
 
     System.out.println("Candle Initialized");
   }
 
   public Command defaultCommand() {
-    return runOnce(
+    return run(
         () -> {
-          LEDSegment.MainStrip.fullClear();
-          LEDSegment.InternalLEDs.fullClear();
+          // Create a custom blended flow animation
+          for (int i = 0; i < 255; i++) {
+            int red = (int) (purple.red * (1 - i / 255.0) + yellow.red * (i / 255.0));
+            int green = (int) (purple.green * (1 - i / 255.0) + yellow.green * (i / 255.0));
+            int blue = (int) (purple.blue * (1 - i / 255.0) + yellow.blue * (i / 255.0));
 
-          LEDSegment.MainStrip.setColor(purple);
-          LEDSegment.InternalLEDs.setColor(purple);
-          // LEDSegment.MainStrip.setFireAnimation(0.5, 0.25, 0.25);
+            LEDSegment.MainStrip.setColor(new Color(red, green, blue));
+            LEDSegment.InternalLEDs.setColor(new Color(red, green, blue));
 
-          LEDSegment.MainStrip.setFlowAnimation(purple, 0.5);
+            try {
+              Thread.sleep(10); // Adjust the delay for smoother/faster transitions
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+          }
+
+          for (int i = 255; i >= 0; i--) {
+            int red = (int) (purple.red * (1 - i / 255.0) + yellow.red * (i / 255.0));
+            int green = (int) (purple.green * (1 - i / 255.0) + yellow.green * (i / 255.0));
+            int blue = (int) (purple.blue * (1 - i / 255.0) + yellow.blue * (i / 255.0));
+
+            LEDSegment.MainStrip.setColor(new Color(red, green, blue));
+            LEDSegment.InternalLEDs.setColor(new Color(red, green, blue));
+
+            try {
+              Thread.sleep(10); // Adjust the delay for smoother/faster transitions
+            } catch (InterruptedException e) {
+              e.printStackTrace();
+            }
+          }
         });
   }
 
   public static enum LEDSegment {
-    InternalLEDs(0, 8, 0),
-    MainStrip(8, 68, 1);
-    // start index is what LED to start on, 0-7 are the candles onboard LEDS, beyond is the strip
+    InternalLEDs(0, 100, 0),
+    MainStrip(8, 100, 0);
+    // start index is what LED to start on, 0-7 are the candles onboard LEDS, beyond
+    // is the strip
 
     public final int startIndex;
     public final int segmentSize;
@@ -75,9 +98,9 @@ public class Lights extends SubsystemBase {
     }
 
     public void setColor(Color color) {
-      clearAnimation();
+      // clearAnimation();
       candle.setLEDs(color.red, color.green, color.blue, 0, startIndex, segmentSize);
-      System.out.println("setting color to" + color.red + color.blue + color.green);
+      // System.out.println("setting color to" + color.red + color.blue + color.green);
     }
 
     private void setAnimation(Animation animation) {

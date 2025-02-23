@@ -113,7 +113,7 @@ public final class Constants {
     /* Module Specific Constants */
     /* Front Left Module - Module 0 */
     public static final class Mod0 { // TODO: This must be tuned to specific robot
-      public static final int driveMotorID = 0;
+      public static final int driveMotorID = 1;
       public static final int angleMotorID = 2;
       public static final int canCoderID = 6;
       public static final Rotation2d angleOffset = Rotation2d.fromDegrees(36.73);
@@ -329,19 +329,33 @@ public final class Constants {
   public final class ElevatorConstants {
     public static final int ELEVATOR_MOTOR_1_ID = 20;
     public static final int ELEVATOR_MOTOR_2_ID = 21;
-    public static final double HUMAN_PLAYER_STATION_MILLIMETERS = 2531;
-    public static final double REEF_LEVEL_1_MILLIMETERS = 2531;
-    public static final double REEF_LEVEL_2_MILLIMETERS = 2531;
-    public static final double REEF_LEVEL_3_MILLIMETERS = 2531;
-    public static final double REEF_LEVEL_4_MILLIMETERS = 2531;
-    public static final double PROCESSOR_HEIGHT_MILLIMETERS = 2531;
+    public static final double HUMAN_PLAYER_STATION_MILLIMETERS = 5;
+    public static final double REEF_LEVEL_1_MILLIMETERS = 5; // 23.5
+    public static final double REEF_LEVEL_2_MILLIMETERS = 5;
+    public static final double REEF_LEVEL_3_MILLIMETERS = 5;
+    public static final double REEF_LEVEL_4_MILLIMETERS = 5;
+    public static final double HIGH_ALGAE_HEIGHT = 5;
+    public static final double LOW_ALGAE_HEIGHT = 50;
+    public static final double PROCESSOR_HEIGHT_MILLIMETERS = 20;
     public static final double ELEVATOR_MILLIMETERS_TO_ROTATIONS = 2531;
     public static final double ELEVATOR_THRESHOLD = 2531;
+    public static final double BARGE_HEIGHT = 68;
   }
 
   public final class EndEffectorConstants {
     public static final int EFFECTOR_MOTOR_1_ID = 30;
     public static final int EFFECTOR_MOTOR_2_ID = 31;
+
+    public static final double WRIST_HUMAN_PLAYER_INTAKE = 1.8;
+    public static final double WRIST_L4 = -7;
+    public static final double WRIST_L3 = 4.1;
+    public static final double WRIST_ALGAE_POSITION = 2531;
+    public static final double WRIST_PROCESSOR_POSITION = 2531;
+
+    public static final double WRIST_BARGE_POSITION = 2531;
+
+    public static final double INTAKE_POWER = 3.5;
+    public static final double EJECT_POWER = -3.5;
   }
 
   public final class IntakeConstants {
@@ -350,7 +364,10 @@ public final class Constants {
     public static final int PIVOT_MOTOR_3_ID = 52;
     public static final int INTAKE_SPIN_MOTOR_ID = 53;
 
-    public static final int GROUND_ALGAE_INTAKE_SETPOINT = 2531;
+    public static final double GROUND_ALGAE_INTAKE_SETPOINT = 2531;
+    public static final double ALGAE_PROCESSOR_SETPOINT = 2531;
+    public static final double INTAKE_GROUND_ALGAE_POWER = 7.5;
+    public static final double EJECT_GROUND_ALGAE_POWER = -7.6;
   }
 
   public final class FieldConstants {

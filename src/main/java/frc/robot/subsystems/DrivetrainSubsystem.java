@@ -65,8 +65,8 @@ public class DrivetrainSubsystem extends SubsystemBase {
             Constants.DriveConstants.swerveKinematics,
             getGyroscopeRotation(),
             getModulePositions(),
-            Constants.DriveConstants.DRIVE_ODOMETRY_ORIGIN);
-    odometer.setVisionMeasurementStdDevs(VecBuilder.fill(0.5, 0.5, 99999999));
+            new Pose2d());
+    odometer.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 99999999));
     PathPlannerLogging.setLogActivePathCallback(
         (poses) -> m_field.getObject("path").setPoses(poses));
 
@@ -93,40 +93,59 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public void drive(
-      Translation2d translation, double rotation, boolean fieldRelative, Boolean isOpenLoop) {
-    // if (Preferences.getBoolean("AntiTipActive", false)) {
-    // if (gyro.getRoll().getValueAsDouble() > 3) {
-    // ChassisSpeeds. = chassisSpeeds.vxMetersPerSecond
-    // + (pigeon.getRoll().getValueAsDouble()/10);
-    // } else if (pigeon.getRoll().getValueAsDouble() < -3) {
-    // chassisSpeeds.vxMetersPerSecond = chassisSpeeds.vxMetersPerSecond
-    // + (-pigeon.getRoll().getValueAsDouble()/10);
-    // }
-    // if (pigeon.getPitch().getValueAsDouble() > 3) {
-    // chassisSpeeds.vyMetersPerSecond = chassisSpeeds.vyMetersPerSecond
-    // + (pigeon.getPitch().getValueAsDouble()/10);
-    // } else if (pigeon.getPitch().getValueAsDouble() < -3) {
-    // chassisSpeeds.vyMetersPerSecond = chassisSpeeds.vyMetersPerSecond
-    // + (-pigeon.getPitch().getValueAsDouble()/10);
-    // }
-    // }
+      Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
 
+    // Convert the translation and rotation into ChassisSpeeds
+    ChassisSpeeds chassisSpeeds =
+        fieldRelative
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(
+                translation.getX(), translation.getY(), rotation, getHeading())
+            : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+
+    // Apply anti-tip logic to the chassis speeds
+    chassisSpeeds = applyAntiTipLogic(chassisSpeeds);
+
+    // Convert ChassisSpeeds to SwerveModuleStates
     SwerveModuleState[] swerveModuleStates =
         Constants.DriveConstants.swerveKinematics.toSwerveModuleStates(
-            fieldRelative
-                ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                    translation.getX(), translation.getY(), rotation, getHeading()
-                    // getGyroYaw()
-                    )
-                : new ChassisSpeeds(translation.getX(), translation.getY(), rotation));
+            ChassisSpeeds.discretize(chassisSpeeds, 0.02));
+
+    // Desaturate wheel speeds
     SwerveDriveKinematics.desaturateWheelSpeeds(
         swerveModuleStates, Constants.DriveConstants.maxSpeed);
 
+    // Set the desired state for each module
     for (SwerveModule mod : mSwerveMods) {
       mod.setDesiredState(swerveModuleStates[mod.moduleNumber], isOpenLoop);
     }
   }
 
+  /**
+   * Helper method to apply anti-tip logic to the ChassisSpeeds.
+   *
+   * @param chassisSpeeds The original ChassisSpeeds.
+   * @return The adjusted ChassisSpeeds with anti-tip logic applied.
+   */
+  private ChassisSpeeds applyAntiTipLogic(ChassisSpeeds chassisSpeeds) {
+
+    double pitch = getPigeonPitch();
+    double roll = getPigeonRoll();
+
+    // Adjust the chassis speeds based on pitch and roll
+    if (roll > 3) {
+      chassisSpeeds.vxMetersPerSecond += (roll / 10);
+    } else if (roll < -3) {
+      chassisSpeeds.vxMetersPerSecond += (-roll / 10);
+    }
+
+    if (pitch > 3) {
+      chassisSpeeds.vyMetersPerSecond += (pitch / 10);
+    } else if (pitch < -3) {
+      chassisSpeeds.vyMetersPerSecond += (-pitch / 10);
+    }
+
+    return chassisSpeeds;
+  }
   /* Used by SwerveControllerCommand in Auto */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.DriveConstants.maxSpeed);

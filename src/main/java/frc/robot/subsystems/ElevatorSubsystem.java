@@ -6,17 +6,14 @@ package frc.robot.subsystems;
 
 import static frc.robot.settings.Constants.ElevatorConstants.*;
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.helpers.MotorLogger;
-import frc.robot.settings.ElevatorStates;
 
 public class ElevatorSubsystem extends SubsystemBase {
   private TalonFX elevatorMotor1;
@@ -32,27 +29,38 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorMotor1 = new TalonFX(ELEVATOR_MOTOR_1_ID);
     elevatorMotor2 = new TalonFX(ELEVATOR_MOTOR_2_ID);
 
-    eleMotorConfig =
-        new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(1).withKS(0).withKA(0).withKV(0))
-            .withCurrentLimits(
-                new CurrentLimitsConfigs()
-                    .withSupplyCurrentLimit(100)
-                    .withSupplyCurrentLimitEnable(true));
+    // var talonFXConfigs = new TalonFXConfiguration();
 
-    // .withMotionMagic(new MotionMagicConfigs()
-    // .withMotionMagicAcceleration(2531)
-    // .withMotionMagicCruiseVelocity(2531)
-    // .withMotionMagicJerk(2531));
-    elevatorMotor1.getConfigurator().apply(eleMotorConfig);
-    elevatorMotor2.getConfigurator().apply(eleMotorConfig);
-    elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
+    elevatorMotor1.setNeutralMode(NeutralModeValue.Brake);
+    elevatorMotor2.setNeutralMode(NeutralModeValue.Brake);
+
+    // var slot0Configs = talonFXConfigs.Slot0;
+    // slot0Configs.kS = 0.25; // Add 0.25 V output to overcome static friction
+    // slot0Configs.kV = 1; // A velocity target of 1 rps results in 0.12 V output
+    // slot0Configs.kA = 1; // An acceleration of 1 rps/s requires 0.01 V output .01
+    // slot0Configs.kP = 0.00; // A position error of 2.5 rotations results in 12 V output
+    // slot0Configs.kI = 0; // no output for integrated error
+    // slot0Configs.kD = 0.0; // A velocity error of 1 rps results in 0.1 V output
+
+    // var motionMagicConfigs = talonFXConfigs.MotionMagic;
+    // motionMagicConfigs.MotionMagicCruiseVelocity = 3000; // Target cruise velocity of 80 rps
+    // motionMagicConfigs.MotionMagicAcceleration =
+    //     9000; // Target acceleration of 160 rps/s (0.5 seconds) 60
+    // motionMagicConfigs.MotionMagicJerk = 0; // Target jerk of 1600 rps/s/s (0.1 seconds)
+
+    // // .withMotionMagic(new MotionMagicConfigs()
+    // // .withMotionMagicAcceleration(2531)
+    // // .withMotionMagicCruiseVelocity(2531)
+    // // .withMotionMagicJerk(2531));
+    // elevatorMotor1.getConfigurator().apply(talonFXConfigs);
+    // elevatorMotor2.getConfigurator().apply(talonFXConfigs);
+    // elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
 
     motorLogger1 = new MotorLogger("/elevator/motor1");
     motorLogger2 = new MotorLogger("/elevator/motor2");
 
-    elevatorHallEffect1 = new DigitalInput(0);
-    elevatorHallEffect2 = new DigitalInput(1);
+    // elevatorHallEffect1 = new DigitalInput(0);
+    // elevatorHallEffect2 = new DigitalInput(1);
   }
 
   private void logMotors() {
@@ -68,21 +76,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     return elevatorMotor2.getPosition().getValueAsDouble();
   }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-    logMotors();
-    if (elevatorHallEffect1.get()) {
-      elevatorMotor1.setPosition(0);
-    }
-
-    if (elevatorHallEffect2.get()) {
-      elevatorMotor2.setPosition(0);
-    }
-
-    SmartDashboard.putNumber("Left Elevator", getEncoderLeft());
-    SmartDashboard.putNumber("Right Elevator", getEncoderRight());
-  }
   /**
    * Sets the elevator to a position relative to the 0 set by createZero.
    *
@@ -94,31 +87,61 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorMotor1.setControl(request.withPosition(height));
   }
 
-  public void setElevatorPosition(ElevatorStates height) {
-    switch (height) {
-      case Reef1:
-        setElevatorPosition(REEF_LEVEL_1_MILLIMETERS);
-        break;
-      case Reef2:
-        setElevatorPosition(REEF_LEVEL_2_MILLIMETERS);
-        break;
-      case Reef3:
-        setElevatorPosition(REEF_LEVEL_3_MILLIMETERS);
-        break;
-      case Reef4:
-        setElevatorPosition(REEF_LEVEL_4_MILLIMETERS);
-        break;
-      case HumanPlayer:
-        setElevatorPosition(HUMAN_PLAYER_STATION_MILLIMETERS);
-        break;
-    }
-  }
+  // public void setElevatorPosition(ElevatorStates height) {
+  //   switch (height) {
+  //     case Reef1:
+  //       setElevatorPosition(REEF_LEVEL_1_MILLIMETERS);
+  //       break;
+  //     case Reef2:
+  //       setElevatorPosition(REEF_LEVEL_2_MILLIMETERS);
+  //       break;
+  //     case Reef3:
+  //       setElevatorPosition(REEF_LEVEL_3_MILLIMETERS);
+  //       break;
+  //     case Reef4:
+  //       setElevatorPosition(REEF_LEVEL_4_MILLIMETERS);
+  //       break;
+  //     case HumanPlayer:
+  //       setElevatorPosition(HUMAN_PLAYER_STATION_MILLIMETERS);
+  //       break;
+  //   }
+  // }
 
   public boolean isElevatorAtPose() {
     return elevatorMotor1.getClosedLoopError().getValueAsDouble() < ELEVATOR_THRESHOLD;
   }
 
+  public void setMotors(double speed1, double speed2) {
+    elevatorMotor1.set(-speed1);
+    elevatorMotor2.set(speed2);
+  }
+
   public void stopElevator() {
     elevatorMotor1.set(0);
+  }
+
+  public void zeroMotorEncoders() {
+    elevatorMotor1.setPosition(0);
+    elevatorMotor2.setPosition(0);
+    
+    
+  }
+
+  
+
+  @Override
+  public void periodic() {
+    // This method will be called once per scheduler run
+    logMotors();
+    // if (elevatorHallEffect1.get()) {
+    //   elevatorMotor1.setPosition(0);
+    // }
+
+    // if (elevatorHallEffect2.get()) {
+    //   elevatorMotor2.setPosition(0);
+    // }
+
+    SmartDashboard.putNumber("Left Elevator", getEncoderLeft());
+    SmartDashboard.putNumber("Right Elevator", getEncoderRight());
   }
 }

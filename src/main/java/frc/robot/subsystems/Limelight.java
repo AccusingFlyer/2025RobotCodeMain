@@ -273,10 +273,11 @@ public class Limelight {
     // numTagsContributer is better when smaller, and is based off of how many april tags the
     // Limelight identifies
     double numTagsContributer;
-    if (limelight.getLLTagCount(limelightName) <= 0) {
+    double tagCount = limelight.getLLTagCount(limelightName);
+    if (tagCount <= 0) {
       numTagsContributer = 0;
     } else {
-      numTagsContributer = 1 / limelight.getLLTagCount(limelightName);
+      numTagsContributer = 1 / tagCount;
     }
     // tx and ty contributers are based off where on the limelights screen the april tag is. Closer
     // to the center means the contributer will bea smaller number, which is better.
@@ -329,6 +330,28 @@ public class Limelight {
   }
 
   private boolean isValid(String limelightName, PoseEstimate estimate) {
+
+    // Add a null check for the estimate object
+    if (estimate == null) {
+      // Log an error or warning if the estimate is null
+      System.err.println("Limelight " + limelightName + " returned a null pose estimate.");
+
+      // Update SmartDashboard to indicate the pose is invalid
+      if (limelightName.equalsIgnoreCase(APRILTAG_LIMELIGHTB_NAME)) {
+        SmartDashboard.putBoolean("Vision/Left/valid", false);
+        SmartDashboard.putNumber("Vision/Left/Stats/valid", 0);
+      } else if (limelightName.equalsIgnoreCase(APRILTAG_LIMELIGHTC_NAME)) {
+        SmartDashboard.putBoolean("Vision/Right/valid", false);
+        SmartDashboard.putNumber("Vision/Right/Stats/valid", 0);
+      } else if (limelightName.equalsIgnoreCase(APRILTAG_LIMELIGHTA_NAME)) {
+        SmartDashboard.putBoolean("Vision/Extra/valid", false);
+        SmartDashboard.putNumber("Vision/Extra/Stats/valid", 0);
+      } else {
+        System.err.println("Limelight name is invalid. (limelight.isValid)");
+      }
+      return false; // Return false since the pose is invalid
+    }
+
     Boolean valid =
         (estimate.pose.getX() < FIELD_CORNER.getX()
             && estimate.pose.getX() > 0.0

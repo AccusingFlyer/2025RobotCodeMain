@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import static frc.robot.settings.Constants.DriveConstants.*;
 import static frc.robot.settings.Constants.xboxDriver.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -25,16 +24,19 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.Drive;
-import frc.robot.commands.ElevatorCommand;
-import frc.robot.commands.intake.IntakePowerCommand;
-import frc.robot.commands.intake.IntakeSetpointCommand;
-import frc.robot.settings.Constants.Vision;
+import frc.robot.commands.Drive.Drive;
+import frc.robot.commands.Elevator.ElevatorCommand;
+import frc.robot.commands.Elevator.ElevatorManualCommand;
+import frc.robot.commands.EndEffector.ClawRoller;
+import frc.robot.commands.EndEffector.WristSetpointCommand;
+// import frc.robot.commands.IntakePowerCommand;
+// import frc.robot.commands.IntakeSetpointCommand;
 import frc.robot.settings.Constants;
-import frc.robot.settings.ElevatorStates;
+import frc.robot.settings.Constants.Vision;
+import frc.robot.subsystems.AutoReefAlignSubsystem;
 import frc.robot.subsystems.DrivetrainSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
-import frc.robot.subsystems.Intake;
+import frc.robot.subsystems.EndEffectorSubsystem;
 import frc.robot.subsystems.Lights;
 import frc.robot.subsystems.Limelight;
 import frc.robot.subsystems.RobotState;
@@ -56,17 +58,17 @@ public class RobotContainer {
   // we run the code.
 
   private final boolean DrivetrainExists = Preferences.getBoolean("DrivetrainExists", true);
-  
 
   private DrivetrainSubsystem driveTrain;
   private ElevatorSubsystem elevator;
-  private Intake intake;
+  // private IntakeSubsystem intake;
+  private EndEffectorSubsystem endEffector;
+  private AutoReefAlignSubsystem reefAlign;
 
   private Drive defaultDriveCommand;
-  private ElevatorCommand elevatorDefaultCommand;
 
   private XboxController driverControllerXbox;
-  private XboxController operatorControllerXbox;
+  public static XboxController operatorControllerXbox;
 
   private Limelight limelight;
   private Lights lights;
@@ -80,13 +82,17 @@ public class RobotContainer {
   BooleanSupplier RightReefLineupSup;
   BooleanSupplier SlowFrontSup;
   BooleanSupplier AlgaeIntakeSup;
-  BooleanSupplier AlgaeShooterSup;
+  BooleanSupplier CoralIntakeSup;
+  BooleanSupplier AlgaeProcessorPositionSup;
+  BooleanSupplier CoralReefScoreSup;
   BooleanSupplier ReefHeight1Supplier;
   BooleanSupplier ReefHeight2Supplier;
   BooleanSupplier ReefHeight3Supplier;
   BooleanSupplier ReefHeight4Supplier;
-  BooleanSupplier CoralPlaceTeleSupplier;
+  BooleanSupplier BargeHeightSupplier;
   BooleanSupplier CoralIntakeHeightSupplier;
+  BooleanSupplier removeAlgaeHighSupplier;
+  BooleanSupplier removeAlgaeLowSupplier;
   // BooleanSupplier ReefA;
   // BooleanSupplier ReefB;
   // BooleanSupplier ReefC;
@@ -110,7 +116,6 @@ public class RobotContainer {
   public RobotContainer() {
     // preferences are initialized IF they don't already exist on the Rio
 
-    
     Preferences.initBoolean("AntiTipActive", false);
 
     DataLogManager.start(); // Start logging
@@ -130,58 +135,98 @@ public class RobotContainer {
     RightStickSupplier = driverControllerXbox.getRightStickButton();
 
     ZeroGyroSup = driverControllerXbox::getStartButton;
-    LeftReefLineupSup = driverControllerXbox::getLeftBumperButton;
-    RightReefLineupSup = driverControllerXbox::getRightBumperButton;
-    AlgaeIntakeSup = () ->
-             (driverControllerXbox.getRightTriggerAxis() > 0.1);
-    AlgaeShooterSup = driverControllerXbox::getXButton;
-    CoralPlaceTeleSupplier = () -> driverControllerXbox.getPOV() == 0;
 
-    ReefHeight1Supplier = () -> driverControllerXbox.getPOV() == 0;
-    ReefHeight2Supplier = () -> driverControllerXbox.getPOV() == 90;
-    ReefHeight3Supplier = () -> driverControllerXbox.getPOV() == 180;
-    ReefHeight4Supplier = () -> driverControllerXbox.getPOV() == 270;
+    AlgaeIntakeSup = () -> (driverControllerXbox.getRightTriggerAxis() > 0.1);
+    CoralIntakeSup = () -> (driverControllerXbox.getLeftTriggerAxis() > 0.1);
+    // AlgaeProcessorOuttakeSup = driverControllerXbox::getLeftBumperButton;
+    CoralReefScoreSup = driverControllerXbox::getRightBumperButton;
+
+    ReefHeight1Supplier = driverControllerXbox::getXButton;
+    ReefHeight2Supplier = driverControllerXbox::getYButton;
+    ReefHeight3Supplier = driverControllerXbox::getBButton;
+    ReefHeight4Supplier = driverControllerXbox::getAButton;
+
+    removeAlgaeLowSupplier = () -> driverControllerXbox.getPOV() == 180;
+    LeftReefLineupSup = () -> driverControllerXbox.getPOV() == 270;
+    // RightReefLineupSup = () -> driverControllerXbox.getPOV() == 90;
+    AlgaeProcessorPositionSup = () -> driverControllerXbox.getPOV() == 90;
+    removeAlgaeHighSupplier = () -> driverControllerXbox.getPOV() == 0;
+
+    BargeHeightSupplier = () -> (operatorControllerXbox.getLeftTriggerAxis() > 0.1);
     // ReefA =
-    //     () ->
-    //         (driverControllerXbox.getRightTriggerAxis() > 0.1)
-    //             && driverControllerXbox.getLeftBumperButton();
+    // () ->
+    // (driverControllerXbox.getRightTriggerAxis() > 0.1)
+    // && driverControllerXbox.getLeftBumperButton();
     // ;
     // ReefB =
-    //     () ->
-    //         (driverControllerXbox.getRightTriggerAxis() > 0.1)
-    //             && driverControllerXbox.getRightBumperButton();
+    // () ->
+    // (driverControllerXbox.getRightTriggerAxis() > 0.1)
+    // && driverControllerXbox.getRightBumperButton();
     // ;
-    // ReefC = () -> driverControllerXbox.getAButton() && driverControllerXbox.getLeftBumperButton();
-    // ReefD = () -> driverControllerXbox.getAButton() && driverControllerXbox.getRightBumperButton();
-    // ReefE = () -> driverControllerXbox.getBButton() && driverControllerXbox.getLeftBumperButton();
-    // ReefF = () -> driverControllerXbox.getBButton() && driverControllerXbox.getRightBumperButton();
-    // ReefL = () -> driverControllerXbox.getXButton() && driverControllerXbox.getRightBumperButton();
-    // ReefK = () -> driverControllerXbox.getXButton() && driverControllerXbox.getLeftBumperButton();
-    // ReefJ = () -> driverControllerXbox.getYButton() && driverControllerXbox.getRightBumperButton();
-    // ReefI = () -> driverControllerXbox.getYButton() && driverControllerXbox.getLeftBumperButton();
+    // ReefC = () -> driverControllerXbox.getAButton() &&
+    // driverControllerXbox.getLeftBumperButton();
+    // ReefD = () -> driverControllerXbox.getAButton() &&
+    // driverControllerXbox.getRightBumperButton();
+    // ReefE = () -> driverControllerXbox.getBButton() &&
+    // driverControllerXbox.getLeftBumperButton();
+    // ReefF = () -> driverControllerXbox.getBButton() &&
+    // driverControllerXbox.getRightBumperButton();
+    // ReefL = () -> driverControllerXbox.getXButton() &&
+    // driverControllerXbox.getRightBumperButton();
+    // ReefK = () -> driverControllerXbox.getXButton() &&
+    // driverControllerXbox.getLeftBumperButton();
+    // ReefJ = () -> driverControllerXbox.getYButton() &&
+    // driverControllerXbox.getRightBumperButton();
+    // ReefI = () -> driverControllerXbox.getYButton() &&
+    // driverControllerXbox.getLeftBumperButton();
     // ReefH =
-    //     () ->
-    //         (driverControllerXbox.getLeftTriggerAxis() > 0.1)
-    //             && driverControllerXbox.getLeftBumperButton();
+    // () ->
+    // (driverControllerXbox.getLeftTriggerAxis() > 0.1)
+    // && driverControllerXbox.getLeftBumperButton();
     // ReefG =
-    //     () ->
-    //         (driverControllerXbox.getLeftTriggerAxis() > 0.1)
-    //             && driverControllerXbox.getRightBumperButton();
-    CoralIntakeHeightSupplier = () -> operatorControllerXbox.getStartButton();
+    // () ->
+    // (driverControllerXbox.getLeftTriggerAxis() > 0.1)
+    // && driverControllerXbox.getRightBumperButton();
 
     limelightInit();
 
     driveTrainInst();
 
-    lightsInst();
+    // lightsInst();
 
     elevatorInst();
 
+    // intakeInst();
+
+    endEffectorInst();
+
+    alignInit();
 
     configureDriveTrain();
 
-    configureBindings(); // Configure the trigger bindings
+    configureBindings();
+
+    // Configure the trigger bindings
     autoInit();
+
+    NamedCommands.registerCommand(
+        "L4",
+        new ParallelCommandGroup(
+            new ElevatorCommand(elevator, Constants.ElevatorConstants.REEF_LEVEL_4_MILLIMETERS),
+            new WristSetpointCommand(endEffector, Constants.EndEffectorConstants.WRIST_L4)));
+
+    NamedCommands.registerCommand(
+        "Score Coral",
+        new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER).withTimeout(0.5));
+
+    NamedCommands.registerCommand(
+        "Intake Coral",
+        new ParallelCommandGroup(
+            new ElevatorCommand(
+                elevator, Constants.ElevatorConstants.HUMAN_PLAYER_STATION_MILLIMETERS),
+            new WristSetpointCommand(
+                endEffector, Constants.EndEffectorConstants.WRIST_HUMAN_PLAYER_INTAKE),
+            new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER)));
   }
 
   private void driveTrainInst() {
@@ -198,7 +243,7 @@ public class RobotContainer {
   }
 
   private void autoInit() {
-    registerNamedCommands();
+
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
   }
@@ -207,14 +252,27 @@ public class RobotContainer {
     limelight = Limelight.getInstance();
   }
 
+  private void alignInit() {
+    reefAlign = new AutoReefAlignSubsystem(limelight, driveTrain);
+  }
+
   private void lightsInst() {
     lights = new Lights();
-    lights.setDefaultCommand(lights.defaultCommand());
+    // lights.setDefaultCommand(lights.defaultCommand());
+    ;
   }
 
   private void elevatorInst() {
     elevator = new ElevatorSubsystem();
-    elevatorDefaultCommand = new ElevatorCommand(elevator, () -> ElevatorStates.HumanPlayer);
+    elevator.setDefaultCommand(new ElevatorManualCommand(elevator));
+  }
+
+  // private void intakeInst() {
+  // intake = new IntakeSubsystem();
+  // }
+
+  private void endEffectorInst() {
+    endEffector = new EndEffectorSubsystem();
   }
 
   /**
@@ -237,24 +295,17 @@ public class RobotContainer {
 
     new Trigger(ReefHeight1Supplier)
         .onTrue(
-            new InstantCommand(
-                () -> RobotState.getInstance().deliveringCoralHeight = ElevatorStates.Reef1));
+            new ParallelCommandGroup(
+                new ElevatorCommand(elevator, Constants.ElevatorConstants.REEF_LEVEL_1_MILLIMETERS),
+                new WristSetpointCommand(endEffector, Constants.EndEffectorConstants.WRIST_L3)));
     new Trigger(ReefHeight2Supplier)
         .onTrue(
-            new InstantCommand(
-                () -> RobotState.getInstance().deliveringCoralHeight = ElevatorStates.Reef2));
+            new ElevatorCommand(elevator, Constants.ElevatorConstants.REEF_LEVEL_2_MILLIMETERS));
     new Trigger(ReefHeight3Supplier)
         .onTrue(
-            new InstantCommand(
-                () -> RobotState.getInstance().deliveringCoralHeight = ElevatorStates.Reef3));
+            new ElevatorCommand(elevator, Constants.ElevatorConstants.REEF_LEVEL_3_MILLIMETERS));
     new Trigger(ReefHeight4Supplier)
-        .onTrue(
-            new InstantCommand(
-                () -> RobotState.getInstance().deliveringCoralHeight = ElevatorStates.Reef4));
-    new Trigger(CoralIntakeHeightSupplier)
-        .onTrue(
-            new InstantCommand(
-                () -> RobotState.getInstance().deliveringCoralHeight = ElevatorStates.HumanPlayer));
+        .onTrue(new WristSetpointCommand(endEffector, Constants.EndEffectorConstants.WRIST_L4));
     // new Trigger(ReefA).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.A));
     // new Trigger(ReefB).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.B));
     // new Trigger(ReefC).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.C));
@@ -268,7 +319,61 @@ public class RobotContainer {
     // new Trigger(ReefK).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.K));
     // new Trigger(ReefL).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.L));
 
-    new Trigger(AlgaeIntakeSup).onTrue(new ParallelCommandGroup(new IntakeSetpointCommand(intake, Constants.IntakeConstants.GROUND_ALGAE_INTAKE_SETPOINT), new IntakePowerCommand(intake, -3.5)));
+    // new Trigger(AlgaeIntakeSup)
+    // .onTrue(
+    // new ParallelCommandGroup(
+    // new IntakeSetpointCommand(
+    // intake, Constants.IntakeConstants.GROUND_ALGAE_INTAKE_SETPOINT),
+    // new IntakePowerCommand(
+    // intake, Constants.IntakeConstants.INTAKE_GROUND_ALGAE_POWER)));
+
+    new Trigger(CoralIntakeSup)
+        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER))
+        .onTrue(
+            new ParallelCommandGroup(
+                new ElevatorCommand(
+                    elevator, Constants.ElevatorConstants.HUMAN_PLAYER_STATION_MILLIMETERS),
+                new WristSetpointCommand(
+                    endEffector, Constants.EndEffectorConstants.WRIST_HUMAN_PLAYER_INTAKE)));
+
+    new Trigger(CoralReefScoreSup)
+        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER));
+
+    // new Trigger(AlgaeProcessorOuttakeSup)
+    // .onTrue(
+    // new ParallelCommandGroup(
+    // new IntakeSetpointCommand(
+    // intake, Constants.IntakeConstants.ALGAE_PROCESSOR_SETPOINT),
+    // new IntakePowerCommand(
+    // intake, Constants.IntakeConstants.EJECT_GROUND_ALGAE_POWER)));
+
+    new Trigger(removeAlgaeHighSupplier)
+        .onTrue(
+            new ParallelCommandGroup(
+                new ElevatorCommand(elevator, Constants.ElevatorConstants.HIGH_ALGAE_HEIGHT),
+                new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER)));
+
+    new Trigger(removeAlgaeLowSupplier)
+        .onTrue(
+            new ParallelCommandGroup(
+                new ElevatorCommand(elevator, Constants.ElevatorConstants.LOW_ALGAE_HEIGHT),
+                new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER)));
+
+    // new Trigger(LeftReefLineupSup).whileTrue(reefAlign.leftReefAlign());
+
+    // new Trigger(RightReefLineupSup).whileTrue(reefAlign.rightReefAlign());
+
+    new Trigger(BargeHeightSupplier)
+        .onTrue(
+            new ParallelCommandGroup(
+                new ElevatorCommand(elevator, Constants.ElevatorConstants.BARGE_HEIGHT),
+                new WristSetpointCommand(
+                    endEffector, Constants.EndEffectorConstants.WRIST_BARGE_POSITION)));
+
+    new Trigger(AlgaeProcessorPositionSup)
+        .onTrue(
+            new WristSetpointCommand(
+                endEffector, Constants.EndEffectorConstants.WRIST_PROCESSOR_POSITION));
   }
 
   // Schedule `exampleMethodCommand` when the Xbox controller's B button is
@@ -289,12 +394,10 @@ public class RobotContainer {
           driveTrain::setChassisSpeeds,
           new PPHolonomicDriveController(
               new com.pathplanner.lib.config.PIDConstants(
-                  k_XY_P, k_XY_I,
-                  k_XY_D), // PID constants to correct for translation error (used to create the X
+                  5, 0, 0), // PID constants to correct for translation error (used to create the X
               // and Y PID controllers)
               new com.pathplanner.lib.config.PIDConstants(
-                  k_THETA_P, k_THETA_I,
-                  k_THETA_D) // PID constants to correct for rotation error (used to create the
+                  2, 0, 0) // PID constants to correct for rotation error (used to create the
               // rotation controller)
               ),
           RobotConfig.fromGUISettings(),
@@ -324,15 +427,15 @@ public class RobotContainer {
     return value;
   }
 
-  private void registerNamedCommands() {
-    Command elevatorResetNamedCommand;
+  // private void registerNamedCommands() {
+  // Command elevatorResetNamedCommand;
 
-    
-      elevatorResetNamedCommand =
-          new InstantCommand(() -> elevator.setElevatorPosition(ElevatorStates.HumanPlayer));
-    
-    NamedCommands.registerCommand("ElevatorReset", elevatorResetNamedCommand);
-  }
+  // elevatorResetNamedCommand =
+  // new ElevatorCommand(elevator,
+  // Constants.ElevatorConstants.HUMAN_PLAYER_STATION_MILLIMETERS);
+
+  // NamedCommands.registerCommand("ElevatorReset", elevatorResetNamedCommand);
+  // }
 
   public void logPower() {
     for (int i = 0; i < 16; i++) {
@@ -343,9 +446,8 @@ public class RobotContainer {
   public void teleopInit() {}
 
   public void teleopPeriodic() {
-    
+
     SmartDashboard.putData(driveTrain.getCurrentCommand());
-    
   }
 
   public void robotInit() {}
@@ -356,7 +458,7 @@ public class RobotContainer {
         "AlliancePeriodic",
         currentAlliance == null ? "null" : currentAlliance == Alliance.Red ? "Red" : "Blue");
     if (Preferences.getBoolean("Use Limelight", false)) {
-      limelight.updateLoggingWithPoses();
+      // limelight.updateLoggingWithPoses();
       SmartDashboard.putBoolean(
           "LIMELIGHT/isConnectedFront",
           Limelight.getInstance().isConnected(Vision.APRILTAG_LIMELIGHTA_NAME));
