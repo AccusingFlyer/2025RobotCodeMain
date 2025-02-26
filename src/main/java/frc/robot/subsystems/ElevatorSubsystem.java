@@ -7,7 +7,6 @@ package frc.robot.subsystems;
 import static frc.robot.settings.Constants.ElevatorConstants.*;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -17,8 +16,6 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.helpers.MotorLogger;
 
 public class ElevatorSubsystem extends SubsystemBase {
-  private TalonFX elevatorMotor1;
-  private TalonFX elevatorMotor2;
   private TalonFXConfiguration eleMotorConfig;
   private double zeroPoint;
   DigitalInput elevatorHallEffect1;
@@ -26,9 +23,11 @@ public class ElevatorSubsystem extends SubsystemBase {
   MotorLogger motorLogger1;
   MotorLogger motorLogger2;
   /** Creates a new ElevatorSubsystem. */
+  private TalonFX elevatorMotor1 = new TalonFX(ELEVATOR_MOTOR_1_ID);
+
+  private TalonFX elevatorMotor2 = new TalonFX(ELEVATOR_MOTOR_2_ID);
+
   public ElevatorSubsystem() {
-    elevatorMotor1 = new TalonFX(ELEVATOR_MOTOR_1_ID);
-    elevatorMotor2 = new TalonFX(ELEVATOR_MOTOR_2_ID);
 
     var talonFXConfigs = new TalonFXConfiguration();
 
@@ -48,16 +47,16 @@ public class ElevatorSubsystem extends SubsystemBase {
     var slot0Configs = talonFXConfigs.Slot0;
     slot0Configs.kP = 1.8;
     slot0Configs.kI = 0.0;
-    slot0Configs.kD = 1.6;
+    slot0Configs.kD = 1.5;
     slot0Configs.kS = 0.30;
     slot0Configs.kG = 0.60;
-    slot0Configs.kV = 1;
+    slot0Configs.kV = 2;
     slot0Configs.kA = 1;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = 5.1; // Target cruise velocity of 80 rps
+    motionMagicConfigs.MotionMagicCruiseVelocity = 5.9; // Target cruise velocity of 80 rps
     motionMagicConfigs.MotionMagicAcceleration =
-        7.3; // Target acceleration of 160 rps/s (0.5 seconds) 60
+        7.2; // Target acceleration of 160 rps/s (0.5 seconds) 60
     motionMagicConfigs.MotionMagicJerk = 0; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
     // .withMotionMagic(new MotionMagicConfigs()
@@ -66,22 +65,20 @@ public class ElevatorSubsystem extends SubsystemBase {
     // .withMotionMagicJerk(2531));
 
     // Set elevatorMotor2 to follow elevatorMotor1, with auxiliary control
-    elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
+    // elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
 
     talonFXConfigs.Feedback.SensorToMechanismRatio = 4.375;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;
+
+    // var talonFXConfigs = new TalonFXConfiguration();
+
+    talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
+    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 60;
+
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;
 
-    var talonFXConfiguration2 = new TalonFXConfiguration();
-
-    talonFXConfiguration2.CurrentLimits.StatorCurrentLimit = 60;
-    talonFXConfiguration2.CurrentLimits.StatorCurrentLimitEnable = true;
-
-    talonFXConfiguration2.CurrentLimits.SupplyCurrentLimit = 30;
-    talonFXConfiguration2.CurrentLimits.SupplyCurrentLimitEnable = true;
-
-    elevatorMotor2.getConfigurator().apply(talonFXConfiguration2);
-    elevatorMotor1.getConfigurator().apply(talonFXConfiguration2);
+    elevatorMotor1.getConfigurator().apply(talonFXConfigs);
+    elevatorMotor2.getConfigurator().apply(talonFXConfigs);
 
     motorLogger1 = new MotorLogger("/elevator/motor1");
     motorLogger2 = new MotorLogger("/elevator/motor2");
@@ -106,9 +103,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   /**
    * Sets the elevator to a position relative to the 0 set by createZero.
    *
-   * @param height double that controls how many millimeters from the distance sensor
+   * @param setpoint double that controls how many millimeters from the distance sensor
    */
-  public void setElevatorPosition(double height) {
+  public void setElevatorPosition(double setpoint) {
 
     final MotionMagicVoltage request = new MotionMagicVoltage(0);
 
@@ -123,8 +120,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     // double primaryOutput = request.withPosition(height).getReference();
 
     // Set motors with primary control and synchronization correction
-    elevatorMotor1.setControl(request.withPosition(-height));
-    elevatorMotor2.setControl(request.withPosition(height));
+    elevatorMotor1.setControl(request.withPosition(-setpoint));
+    elevatorMotor2.setControl(request.withPosition(setpoint));
   }
 
   // public void setElevatorPosition(ElevatorStates height) {
@@ -154,6 +151,11 @@ public class ElevatorSubsystem extends SubsystemBase {
   public void setMotors(double speed1, double speed2) {
     elevatorMotor1.set(-speed1);
     elevatorMotor2.set(speed2);
+  }
+
+  public void setNeutralMode(NeutralModeValue mode) {
+    elevatorMotor1.setNeutralMode(mode);
+    elevatorMotor2.setNeutralMode(mode);
   }
 
   public void stopElevator() {

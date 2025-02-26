@@ -4,6 +4,9 @@
 
 package frc.robot.commands.Elevator;
 
+import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem;
 
@@ -11,72 +14,63 @@ import frc.robot.subsystems.ElevatorSubsystem;
 public class ElevatorCommand extends Command {
   ElevatorSubsystem elevator;
 
-  private double height;
+  private double setpoint;
 
-  // private PIDController pidController1 = new PIDController(0.025, 0.0, 0);
-  // private PIDController pidController2 = new PIDController(0.025, 0.0, 0);
-  // private PIDController pidController = new PIDController(0.025, 0.0, 0.00);
+  private PIDController pidControllerAv = new PIDController(0.025, 0.0, 0.00);
+  private PIDController pidController1 = new PIDController(0.025, 0.0, 0);
+  private PIDController pidController2 = new PIDController(0.025, 0.0, 0);
 
-  /**
-   * Creates a new ElevatorCommand.
-   *
-   * @param elevator elevator subsystem
-   * @param level level of reef, human player station is 0.
-   */
-  public ElevatorCommand(ElevatorSubsystem elevator, double height) {
+  ElevatorFeedforward feedforward = new ElevatorFeedforward(0.3, 0.3, 1, 1);
+
+  public ElevatorCommand(ElevatorSubsystem elevator, double setpoint) {
     this.elevator = elevator;
-    this.height = height;
-    addRequirements(elevator);
-    // Use addRequirements() here to declare subsystem dependencies.
+    this.setpoint = setpoint;
+    // addRequirements(elevator);
+    pidControllerAv.setIZone(30);
+    pidController1.setIZone(30);
+    pidController2.setIZone(30);
 
-    // pidController1.setIZone(30);
-    // pidController2.setIZone(30);
-
-    // pidController.setIZone(30);
-
-    // pidController.setSetpoint(height);
-    // pidController1.setSetpoint(height);
-    // pidController2.setSetpoint(height);
-
+    pidControllerAv.setSetpoint(setpoint);
+    pidController1.setSetpoint(setpoint);
+    pidController2.setSetpoint(setpoint);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    // pidController1.reset();
-    // pidController2.reset();
+    pidController1.reset();
+    pidController2.reset();
 
-    // lights.setFireAnimation();
+    elevator.setNeutralMode(NeutralModeValue.Coast);
   }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    // double speed1 = pidController1.calculate(-elevator.getEncoderLeft(), height);
-    // double speed2 = pidController2.calculate(elevator.getEncoderRight(), height);
+    double speed1 = pidController1.calculate(elevator.getEncoderLeft());
+    double speed2 = pidController2.calculate(elevator.getEncoderRight());
 
-    // double averagePosition = (((elevator.getEncoderLeft()) + elevator.getEncoderRight()) / 2.0);
+    double averagePosition = ((Math.abs(speed1) + speed2) / 2.0);
 
-    // double speed = pidController.calculate(averagePosition);
+    double speed = pidControllerAv.calculate(averagePosition);
 
     // System.out.println("PID Output (Speed): " + speed);
 
-    // elevator.setMotors(speed, speed);
+    elevator.setMotors(speed, speed);
 
-    elevator.setElevatorPosition(height);
+    // elevator.setElevatorPosition(averagePosition);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    // elevator.setMotors(0, 0);
+    double feedForwardValue = feedforward.calculate(0);
+    elevator.setMotors(feedForwardValue, feedForwardValue);
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    // return pidController1.atSetpoint() && pidController2.atSetpoint();
-
-    return false;
+    return pidController1.atSetpoint();
   }
 }
