@@ -42,42 +42,23 @@ public class Lights extends SubsystemBase {
 
     // setDefaultCommand(defaultCommand());
 
-    System.out.println("Candle Initialized");
   }
 
-  public Command defaultCommand() {
+  public Command setColor() {
     return run(
         () -> {
-          // Create a custom blended flow animation
-          for (int i = 0; i < 255; i++) {
-            int red = (int) (purple.red * (1 - i / 255.0) + yellow.red * (i / 255.0));
-            int green = (int) (purple.green * (1 - i / 255.0) + yellow.green * (i / 255.0));
-            int blue = (int) (purple.blue * (1 - i / 255.0) + yellow.blue * (i / 255.0));
+          LEDSegment.MainStrip.setBandAnimation(purple, 0.8);
 
-            LEDSegment.MainStrip.setColor(new Color(red, green, blue));
-            LEDSegment.InternalLEDs.setColor(new Color(red, green, blue));
+          LEDSegment.InternalLEDs.setBandAnimation(yellow, 0.8);
+        });
+  }
 
-            try {
-              Thread.sleep(10); // Adjust the delay for smoother/faster transitions
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
-          }
+  public Command setFireAnimation() {
+    return run(
+        () -> {
+          LEDSegment.MainStrip.setFireAnimation(1.0, 0.3, 0.7);
 
-          for (int i = 255; i >= 0; i--) {
-            int red = (int) (purple.red * (1 - i / 255.0) + yellow.red * (i / 255.0));
-            int green = (int) (purple.green * (1 - i / 255.0) + yellow.green * (i / 255.0));
-            int blue = (int) (purple.blue * (1 - i / 255.0) + yellow.blue * (i / 255.0));
-
-            LEDSegment.MainStrip.setColor(new Color(red, green, blue));
-            LEDSegment.InternalLEDs.setColor(new Color(red, green, blue));
-
-            try {
-              Thread.sleep(10); // Adjust the delay for smoother/faster transitions
-            } catch (InterruptedException e) {
-              e.printStackTrace();
-            }
-          }
+          LEDSegment.InternalLEDs.setBandAnimation(purple, 0.8);
         });
   }
 
@@ -131,14 +112,12 @@ public class Lights extends SubsystemBase {
               segmentSize,
               Direction.Forward,
               startIndex));
-      System.out.println("Flow animation set");
     }
 
     public void setFadeAnimation(Color color, double speed) {
       setAnimation(
           new SingleFadeAnimation(
               color.red, color.green, color.blue, 0, speed, segmentSize, startIndex));
-      System.out.println("fade animation set");
     }
 
     public void setBandAnimation(Color color, double speed) {

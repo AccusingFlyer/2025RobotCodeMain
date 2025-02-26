@@ -19,18 +19,20 @@ public class EndEffectorSubsystem extends SubsystemBase {
     var talonFXConfigs = new TalonFXConfiguration();
 
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kS = 0.6; // Add 0.25 V output to overcome static friction
+    slot0Configs.kS = 0.25; // Add 0.25 V output to overcome static friction
+    slot0Configs.kG = 0.50;
     slot0Configs.kV = 1; // A velocity target of 1 rps results in 0.12 V output
     slot0Configs.kA = 1; // An acceleration of 1 rps/s requires 0.01 V output .01
-    slot0Configs.kP = 1; // A position error of 2.5 rotations results in 12 V output
+    slot0Configs.kP = 0.9; // A position error of 2.5 rotations results in 12 V output
     slot0Configs.kI = 0; // no output for integrated error
-    slot0Configs.kD = 0.0; // A velocity error of 1 rps results in 0.1 V output
+    slot0Configs.kD = 0.3; // A velocity error of 1 rps results in 0.1 V output 0.315
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
     // Target cruise velocity of 80 rps
+    motionMagicConfigs.MotionMagicCruiseVelocity = 5.8;
     motionMagicConfigs.MotionMagicAcceleration =
-        400; // Target acceleration of 160 rps/s (0.5 seconds) 60
-    motionMagicConfigs.MotionMagicJerk = 4000; // Target jerk of 1600 rps/s/s (0.1 seconds)
+        6.5; // Target acceleration of 160 rps/s (0.5 seconds) 60
+    motionMagicConfigs.MotionMagicJerk = 0.0; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
     talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 60;
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -72,6 +74,10 @@ public class EndEffectorSubsystem extends SubsystemBase {
     final MotionMagicVoltage request = new MotionMagicVoltage(0);
 
     wristMotor.setControl(request.withPosition(setpoint));
+  }
+
+  public void setNeutralMode(NeutralModeValue mode) {
+    wristMotor.setNeutralMode(mode);
   }
 
   public void setWristSpeed(double speed) {

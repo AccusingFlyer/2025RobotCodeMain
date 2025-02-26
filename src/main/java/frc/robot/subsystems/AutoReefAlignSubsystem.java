@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import static frc.robot.settings.Constants.Vision.APRILTAG_LIMELIGHTC_NAME;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
@@ -17,6 +18,8 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
 
   public double leftReefOffset = 10;
   public double rightReefOffset = -10;
+
+  public double desiredYOffset = 5.0;
 
   public AutoReefAlignSubsystem(
       Limelight Limelight, DrivetrainSubsystem Drive /*EndEffectorSubsystem endEffector */) {
@@ -42,21 +45,34 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
               table.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
 
           double angleError = 0.0;
-          if (poseArray.length == 0) {
-            System.out.println("LeftReefAlign: Empty limelight pose array");
-          } else {
+          if (poseArray.length >= 6) {
             angleError = poseArray[5];
           }
 
-          double ySpeed = 0.0;
-          double xSpeed = 0.0;
-          double rotSpeed = 0.0;
+          if (tv < 0.999) {
+            Drive.drive(new Translation2d(0, 0), 0, false, true);
+          }
+
+          double KpStrafe = 0.02;
+          double kpForward = 0.02;
+          double kpRotation = 0.02;
+
+          double horizontalError = tx - leftReefOffset;
+          double forwardError = ty - desiredYOffset;
+
+          double strafeSpeed = KpStrafe * horizontalError;
+          double forwardSpeed = kpForward * forwardError;
+          double rotSpeed = kpRotation * angleError;
+
+          strafeSpeed = MathUtil.clamp(strafeSpeed, -0.2, 0.2);
+          forwardSpeed = MathUtil.clamp(strafeSpeed, -0.2, 0.2);
+          rotSpeed = MathUtil.clamp(strafeSpeed, -0.3, 0.3);
 
           // double yawCalculated = (Math.signum(Drive.m_gyro.getYaw()) * Math.PI) -
           // (Math.toRadians(Drive.m_gyro.getYaw()));
 
           // double kpTurn = 0.25;
-          float KpStrafe = 0.015f;
+          Drive.drive(new Translation2d(forwardSpeed, strafeSpeed), rotSpeed, false, true);
 
           // if (Math.abs(Math.toDegrees(yawCalculated)) > 1 || Math.abs(xError) > .25){
           // rot = MathUtil.clamp((kpTurn * yawCalculated) + .05, -0.25, 0.25);
@@ -70,49 +86,49 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
           // }
 
           // rotSpeed = (KpStrafe * (angleError));
-          ySpeed =
-              -(KpStrafe * (tx)); // tx = horizontal error, strafe direction in robot coordinates
-          xSpeed = (KpStrafe * (ty));
+          // ySpeed =
+          //     -(KpStrafe * (tx)); // tx = horizontal error, strafe direction in robot coordinates
+          // xSpeed = (KpStrafe * (ty));
 
-          if (rotSpeed > 0.25) {
-            rotSpeed = 0.5;
-          } else if (rotSpeed < -0.25) {
-            rotSpeed = -0.25;
-          }
+          // if (rotSpeed > 0.25) {
+          //   rotSpeed = 0.5;
+          // } else if (rotSpeed < -0.25) {
+          //   rotSpeed = -0.25;
+          // }
 
-          if (xSpeed > 0.75) {
-            xSpeed = 0.75;
-          } else if (xSpeed < -0.75) {
-            xSpeed = -0.75;
-          }
-          if (ySpeed > 0.1) {
-            ySpeed = 0.1;
-          } else if (ySpeed < -0.1) {
-            ySpeed = -0.1;
-          }
+          // if (xSpeed > 0.75) {
+          //   xSpeed = 0.75;
+          // } else if (xSpeed < -0.75) {
+          //   xSpeed = -0.75;
+          // }
+          // if (ySpeed > 0.1) {
+          //   ySpeed = 0.1;
+          // } else if (ySpeed < -0.1) {
+          //   ySpeed = -0.1;
+          // }
 
-          if (tv < 0.9999) {
-            xSpeed = 0;
-            ySpeed = 0;
-            rotSpeed = 0;
-          }
+          // if (tv < 0.9999) {
+          //   xSpeed = 0;
+          //   ySpeed = 0;
+          //   rotSpeed = 0;
+          // }
 
-          Drive.drive(new Translation2d(0, ySpeed), rotSpeed, false, true);
+          // Drive.drive(new Translation2d(0, ySpeed), rotSpeed, false, true);
 
-          if ((tv > 0.9999)
-              && (Math.abs(rotSpeed) < 0.025)
-              && (Math.abs(xSpeed) < 0.025)
-              && (Math.abs(ySpeed) < 0.025)) {
-            // Commands.runOnce(() -> {
+          // if ((tv > 0.9999)
+          //     && (Math.abs(rotSpeed) < 0.025)
+          //     && (Math.abs(xSpeed) < 0.025)
+          //     && (Math.abs(ySpeed) < 0.025)) {
+          //   // Commands.runOnce(() -> {
 
-            // }, Intake);
-          }
+          //   // }, Intake);
+          // }
 
           // debug test
           System.out.printf("Rot, X, Y Speeds");
           System.out.printf("%f\n", rotSpeed);
-          System.out.printf("%f\n", xSpeed);
-          System.out.printf("%f\n", ySpeed);
+          System.out.printf("%f\n", forwardSpeed);
+          System.out.printf("%f\n", strafeSpeed);
         });
   }
 
@@ -133,43 +149,61 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
               table.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
 
           double angleError = 0.0;
-          if (poseArray.length == 0) {
-            System.out.println("RightReefAlign: Empty limelight pose array");
-          } else {
+          if (poseArray.length >= 6) {
             angleError = poseArray[5];
           }
 
-          double ySpeed = 0.0;
-          double xSpeed = 0.0;
-          double rotSpeed = 0.0;
+          if (tv < 0.999) {
+            Drive.drive(new Translation2d(0, 0), 0, false, true);
+          }
+
+          double KpStrafe = 0.02;
+          double kpForward = 0.02;
+          double kpRotation = 0.02;
+
+          double horizontalError = tx - rightReefOffset;
+          double forwardError = ty - desiredYOffset;
+
+          double strafeSpeed = KpStrafe * horizontalError;
+          double forwardSpeed = kpForward * forwardError;
+          double rotSpeed = kpRotation * angleError;
+
+          strafeSpeed = MathUtil.clamp(strafeSpeed, -0.2, 0.2);
+          forwardSpeed = MathUtil.clamp(strafeSpeed, -0.2, 0.2);
+          rotSpeed = MathUtil.clamp(strafeSpeed, -0.3, 0.3);
 
           // double yawCalculated = (Math.signum(Drive.m_gyro.getYaw()) * Math.PI) -
           // (Math.toRadians(Drive.m_gyro.getYaw()));
 
           // double kpTurn = 0.25;
-          float KpStrafe = 0.015f;
+          Drive.drive(new Translation2d(forwardSpeed, strafeSpeed), rotSpeed, false, true);
 
           // if (Math.abs(Math.toDegrees(yawCalculated)) > 1 || Math.abs(xError) > .25){
           // rot = MathUtil.clamp((kpTurn * yawCalculated) + .05, -0.25, 0.25);
 
-          rotSpeed = (KpStrafe * (angleError));
-          ySpeed =
-              -(KpStrafe
-                  * (rightReefOffset
-                      - tx)); // tx = horizontal error, strafe direction in robot coordinates
-          xSpeed = (KpStrafe * (ty));
+          // rotSpeed = (KpStrafe * (angleError));
+          // ySpeed =
+          //     -(KpStrafe
+          //         * (leftReefOffset
+          //             - tx)); // tx = horizontal error, strafe direction in robot coordinates
+          // xSpeed = (KpStrafe * (ty));
           // }
 
-          // if (rotSpeed > 0.10) {
-          //   rotSpeed = 0.10;
-          // } else if (rotSpeed < -0.10) {
-          //   rotSpeed = -0.10;
+          // rotSpeed = (KpStrafe * (angleError));
+          // ySpeed =
+          //     -(KpStrafe * (tx)); // tx = horizontal error, strafe direction in robot coordinates
+          // xSpeed = (KpStrafe * (ty));
+
+          // if (rotSpeed > 0.25) {
+          //   rotSpeed = 0.5;
+          // } else if (rotSpeed < -0.25) {
+          //   rotSpeed = -0.25;
           // }
 
-          // if (xSpeed > 0.075) {
-          //   xSpeed = 0.075;
-          // } else if (xSpeed < -0.075) {
-          //   xSpeed = -0.075;
+          // if (xSpeed > 0.75) {
+          //   xSpeed = 0.75;
+          // } else if (xSpeed < -0.75) {
+          //   xSpeed = -0.75;
           // }
           // if (ySpeed > 0.1) {
           //   ySpeed = 0.1;
@@ -177,28 +211,28 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
           //   ySpeed = -0.1;
           // }
 
-          if (tv < 0.9999) {
-            xSpeed = 0;
-            ySpeed = 0;
-            rotSpeed = 0;
-          }
+          // if (tv < 0.9999) {
+          //   xSpeed = 0;
+          //   ySpeed = 0;
+          //   rotSpeed = 0;
+          // }
 
-          Drive.drive(new Translation2d(0, ySpeed), rotSpeed, false, true);
+          // Drive.drive(new Translation2d(0, ySpeed), rotSpeed, false, true);
 
-          if ((tv > 0.9999)
-              && (Math.abs(rotSpeed) < 0.025)
-              && (Math.abs(xSpeed) < 0.025)
-              && (Math.abs(ySpeed) < 0.025)) {
-            // Commands.runOnce(() -> {
+          // if ((tv > 0.9999)
+          //     && (Math.abs(rotSpeed) < 0.025)
+          //     && (Math.abs(xSpeed) < 0.025)
+          //     && (Math.abs(ySpeed) < 0.025)) {
+          //   // Commands.runOnce(() -> {
 
-            // }, Intake);
-          }
+          //   // }, Intake);
+          // }
 
           // debug test
           System.out.printf("Rot, X, Y Speeds");
           System.out.printf("%f\n", rotSpeed);
-          System.out.printf("%f\n", xSpeed);
-          System.out.printf("%f\n", ySpeed);
+          System.out.printf("%f\n", forwardSpeed);
+          System.out.printf("%f\n", strafeSpeed);
         });
   }
 }

@@ -16,7 +16,6 @@ import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.Preferences;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -371,17 +370,20 @@ public class DrivetrainSubsystem extends SubsystemBase {
           "Mod " + mod.moduleNumber + " Velocity", mod.getState().speedMetersPerSecond);
     }
 
+    SmartDashboard.putNumber("Gyro rotation", getGyroDouble());
+    SmartDashboard.putNumber("rotation pose", getGyroscopeRotation().getDegrees());
+
     // sets the robot orientation for each of the limelights, which is required for
     // the
-    if (Preferences.getBoolean("Use Limelight", false)) {
-      if (SmartDashboard.getBoolean("Vision/force use limelight", false)) {
-        forceUpdateOdometryWithVision();
-      } else {
-        updateOdometryWithVision();
-      }
-    } else {
-      RobotState.getInstance().LimelightsUpdated = false;
-    }
+    // if (Preferences.getBoolean("Use Limelight", false)) {
+    //   if (SmartDashboard.getBoolean("Vision/force use limelight", false)) {
+    //     forceUpdateOdometryWithVision();
+    //   } else {
+    //     updateOdometryWithVision();
+    //   }
+    // } else {
+    //   RobotState.getInstance().LimelightsUpdated = false;
+    // }
 
     m_field.setRobotPose(odometer.getEstimatedPosition());
     logDrivetrainData();

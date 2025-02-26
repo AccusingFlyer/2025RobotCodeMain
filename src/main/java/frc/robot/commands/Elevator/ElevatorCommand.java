@@ -4,7 +4,6 @@
 
 package frc.robot.commands.Elevator;
 
-import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ElevatorSubsystem;
 
@@ -16,7 +15,7 @@ public class ElevatorCommand extends Command {
 
   // private PIDController pidController1 = new PIDController(0.025, 0.0, 0);
   // private PIDController pidController2 = new PIDController(0.025, 0.0, 0);
-  private PIDController pidController = new PIDController(0.025, 0.0, 0.01);
+  // private PIDController pidController = new PIDController(0.025, 0.0, 0.00);
 
   /**
    * Creates a new ElevatorCommand.
@@ -33,11 +32,12 @@ public class ElevatorCommand extends Command {
     // pidController1.setIZone(30);
     // pidController2.setIZone(30);
 
-    pidController.setIZone(30);
+    // pidController.setIZone(30);
 
-    pidController.setSetpoint(height);
+    // pidController.setSetpoint(height);
     // pidController1.setSetpoint(height);
     // pidController2.setSetpoint(height);
+
   }
 
   // Called when the command is initially scheduled.
@@ -45,8 +45,8 @@ public class ElevatorCommand extends Command {
   public void initialize() {
     // pidController1.reset();
     // pidController2.reset();
-    
-    pidController.reset();
+
+    // lights.setFireAnimation();
   }
 
   // Called every time the scheduler runs while the command is scheduled.
@@ -55,21 +55,21 @@ public class ElevatorCommand extends Command {
     // double speed1 = pidController1.calculate(-elevator.getEncoderLeft(), height);
     // double speed2 = pidController2.calculate(elevator.getEncoderRight(), height);
 
-    double averagePosition = (((-elevator.getEncoderLeft()) + elevator.getEncoderRight()) / 2.0);
+    // double averagePosition = (((-elevator.getEncoderLeft()) + elevator.getEncoderRight()) / 2.0);
 
-    double speed = pidController.calculate(averagePosition, height);
+    // double speed = pidController.calculate(averagePosition);
 
-    System.out.println("PID Output (Speed): " + speed);
+    // System.out.println("PID Output (Speed): " + speed);
 
-    elevator.setMotors(speed, speed);
+    // elevator.setMotors(speed, speed);
 
-    
+    elevator.setElevatorPosition(height);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    elevator.setMotors(0, 0);
+    // elevator.setMotors(0, 0);
   }
 
   // Returns true when the command should end.
@@ -77,6 +77,6 @@ public class ElevatorCommand extends Command {
   public boolean isFinished() {
     // return pidController1.atSetpoint() && pidController2.atSetpoint();
 
-    return pidController.atSetpoint();
+    return false;
   }
 }
