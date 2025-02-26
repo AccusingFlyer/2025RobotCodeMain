@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import static frc.robot.settings.Constants.ElevatorConstants.*;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -69,6 +70,9 @@ public class ElevatorSubsystem extends SubsystemBase {
     // .withMotionMagicAcceleration(2531)
     // .withMotionMagicCruiseVelocity(2531)
     // .withMotionMagicJerk(2531));
+
+    // Set elevatorMotor2 to follow elevatorMotor1, with auxiliary control
+    elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
 
     talonFXConfigs.Feedback.SensorToMechanismRatio = 4.375;
 

@@ -5,7 +5,6 @@ import com.ctre.phoenix6.hardware.Pigeon2;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.util.PathPlannerLogging;
-import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -65,7 +64,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             getGyroscopeRotation(),
             getModulePositions(),
             new Pose2d());
-    odometer.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 99999999));
+    // odometer.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 99999999));
     PathPlannerLogging.setLogActivePathCallback(
         (poses) -> m_field.getObject("path").setPoses(poses));
 
