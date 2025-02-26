@@ -1,58 +1,55 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
 import static frc.robot.settings.Constants.ElevatorConstants.*;
 
-import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
-import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
-import com.ctre.phoenix6.controls.PositionVoltage;
+import com.ctre.phoenix6.controls.VelocityVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.helpers.MotorLogger;
-import frc.robot.settings.ElevatorStates;
 
 public class ElevatorSubsystem extends SubsystemBase {
   private TalonFX elevatorMotor1;
   private TalonFX elevatorMotor2;
   private TalonFXConfiguration eleMotorConfig;
   private double zeroPoint;
-  DigitalInput elevatorHallEffect1;
-  DigitalInput elevatorHallEffect2;
   MotorLogger motorLogger1;
   MotorLogger motorLogger2;
+
   /** Creates a new ElevatorSubsystem. */
   public ElevatorSubsystem() {
     elevatorMotor1 = new TalonFX(ELEVATOR_MOTOR_1_ID);
     elevatorMotor2 = new TalonFX(ELEVATOR_MOTOR_2_ID);
 
-    eleMotorConfig =
-        new TalonFXConfiguration()
-            .withSlot0(new Slot0Configs().withKP(1).withKS(0).withKA(0).withKV(0))
-            .withCurrentLimits(
-                new CurrentLimitsConfigs()
-                    .withSupplyCurrentLimit(100)
-                    .withSupplyCurrentLimitEnable(true));
-    // We are not yet sure on whether or not we are using MotionMagic.
-    // .withMotionMagic(new MotionMagicConfigs()
-    // .withMotionMagicAcceleration(2491)
-    // .withMotionMagicCruiseVelocity(2491)
-    // .withMotionMagicJerk(2491));
-    elevatorMotor1.getConfigurator().apply(eleMotorConfig);
-    elevatorMotor2.getConfigurator().apply(eleMotorConfig);
+    var talonFXConfigs = new TalonFXConfiguration();
+
+    elevatorMotor1.setNeutralMode(NeutralModeValue.Brake);
+    elevatorMotor2.setNeutralMode(NeutralModeValue.Brake);
+
+    // Primary PID - Velocity Control
+    var slot0Configs = talonFXConfigs.Slot0;
+    slot0Configs.kP = 0.1; // Proportional gain for velocity control
+    slot0Configs.kI = 0.0; // Integral gain
+    slot0Configs.kD = 0.01; // Derivative gain
+    slot0Configs.kS = 0.30; // Static friction gain
+    slot0Configs.kG = 0.60; // Gravity gain
+    slot0Configs.kV = 1; // Velocity feedforward gain
+    slot0Configs.kA = 0.01; // Acceleration feedforward gain
+
+    // Set elevatorMotor2 to follow elevatorMotor1
     elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
+
+    talonFXConfigs.Feedback.SensorToMechanismRatio = 4.375;
+
+    elevatorMotor2.getConfigurator().apply(talonFXConfigs);
+    elevatorMotor1.getConfigurator().apply(talonFXConfigs);
 
     motorLogger1 = new MotorLogger("/elevator/motor1");
     motorLogger2 = new MotorLogger("/elevator/motor2");
-
-    elevatorHallEffect1 = new DigitalInput(0);
-    elevatorHallEffect2 = new DigitalInput(1);
   }
 
   private void logMotors() {
@@ -60,66 +57,52 @@ public class ElevatorSubsystem extends SubsystemBase {
     motorLogger2.log(elevatorMotor2);
   }
 
-  public double getEncoderLeft() {
-    return -elevatorMotor1.getPosition().getValueAsDouble();
+  public double getVelocityLeft() {
+    return -elevatorMotor1.getVelocity().getValueAsDouble();
   }
 
-  public double getEncoderRight() {
-    return elevatorMotor2.getPosition().getValueAsDouble();
+  public double getVelocityRight() {
+    return elevatorMotor2.getVelocity().getValueAsDouble();
+  }
+
+  /**
+   * Sets the elevator to a target velocity.
+   *
+   * @param velocity double that controls the target velocity in rps
+   */
+  public void setElevatorVelocity(double velocity) {
+    VelocityVoltage velocityRequest = new VelocityVoltage(velocity);
+
+    // Set motors with velocity control
+    elevatorMotor1.setControl(velocityRequest.withVelocity(-velocity));
+    elevatorMotor2.setControl(velocityRequest.withVelocity(velocity));
+  }
+
+  public boolean isElevatorAtVelocity() {
+    return Math.abs(elevatorMotor1.getClosedLoopError().getValueAsDouble()) < ELEVATOR_THRESHOLD;
+  }
+
+  public void setMotors(double speed1, double speed2) {
+    elevatorMotor1.set(-speed1);
+    elevatorMotor2.set(speed2);
+  }
+
+  public void stopElevator() {
+    elevatorMotor1.set(0);
+    elevatorMotor2.set(0);
+  }
+
+  public void zeroMotorEncoders() {
+    elevatorMotor1.setPosition(0);
+    elevatorMotor2.setPosition(0);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
     logMotors();
-    if (elevatorHallEffect1.get()) {
-      elevatorMotor1.setPosition(0);
-    }
 
-    if (elevatorHallEffect2.get()) {
-      elevatorMotor2.setPosition(0);
-    }
-
-    SmartDashboard.putNumber("Left Elevator", getEncoderLeft());
-    SmartDashboard.putNumber("Right Elevator", getEncoderRight());
-  }
-  /**
-   * Sets the elevator to a position relative to the 0 set by createZero.
-   *
-   * @param height double that controls how many millimeters from the distance sensor
-   */
-  public void setElevatorPosition(double height) {
-    double position = height * ELEVATOR_MILLIMETERS_TO_ROTATIONS;
-    double uPos = position + zeroPoint;
-    PositionVoltage voltReq = new PositionVoltage(0);
-    elevatorMotor1.setControl(voltReq.withPosition(uPos));
-  }
-
-  public void setElevatorPosition(ElevatorStates height) {
-    switch (height) {
-      case Reef1:
-        setElevatorPosition(REEF_LEVEL_1_MILLIMETERS);
-        break;
-      case Reef2:
-        setElevatorPosition(REEF_LEVEL_2_MILLIMETERS);
-        break;
-      case Reef3:
-        setElevatorPosition(REEF_LEVEL_3_MILLIMETERS);
-        break;
-      case Reef4:
-        setElevatorPosition(REEF_LEVEL_4_MILLIMETERS);
-        break;
-      case HumanPlayer:
-        setElevatorPosition(HUMAN_PLAYER_STATION_MILLIMETERS);
-        break;
-    }
-  }
-
-  public boolean isElevatorAtPose() {
-    return elevatorMotor1.getClosedLoopError().getValueAsDouble() < ELEVATOR_THRESHOLD;
-  }
-
-  public void stopElevator() {
-    elevatorMotor1.set(0);
+    SmartDashboard.putNumber("Left Elevator Velocity", getVelocityLeft());
+    SmartDashboard.putNumber("Right Elevator Velocity", getVelocityRight());
   }
 }
