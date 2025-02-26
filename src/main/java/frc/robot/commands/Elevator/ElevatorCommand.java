@@ -55,7 +55,7 @@ public class ElevatorCommand extends Command {
     // double speed1 = pidController1.calculate(-elevator.getEncoderLeft(), height);
     // double speed2 = pidController2.calculate(elevator.getEncoderRight(), height);
 
-    // double averagePosition = (((-elevator.getEncoderLeft()) + elevator.getEncoderRight()) / 2.0);
+    // double averagePosition = (((elevator.getEncoderLeft()) + elevator.getEncoderRight()) / 2.0);
 
     // double speed = pidController.calculate(averagePosition);
 

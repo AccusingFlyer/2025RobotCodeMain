@@ -54,12 +54,6 @@ public class ElevatorSubsystem extends SubsystemBase {
     slot0Configs.kV = 1;
     slot0Configs.kA = 1;
 
-    // Auxiliary PID - Synchronization Control
-    var slot1Configs = talonFXConfigs.Slot1;
-    slot1Configs.kP = 1.0; // Lower value to keep sides synced without overcorrecting
-    slot1Configs.kI = 0.0;
-    slot1Configs.kD = 0.5;
-
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
     motionMagicConfigs.MotionMagicCruiseVelocity = 5.1; // Target cruise velocity of 80 rps
     motionMagicConfigs.MotionMagicAcceleration =
@@ -75,9 +69,19 @@ public class ElevatorSubsystem extends SubsystemBase {
     elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
 
     talonFXConfigs.Feedback.SensorToMechanismRatio = 4.375;
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
 
-    elevatorMotor2.getConfigurator().apply(talonFXConfigs);
-    elevatorMotor1.getConfigurator().apply(talonFXConfigs);
+    var talonFXConfiguration2 = new TalonFXConfiguration();
+
+    talonFXConfiguration2.CurrentLimits.StatorCurrentLimit = 60;
+    talonFXConfiguration2.CurrentLimits.StatorCurrentLimitEnable = true;
+
+    talonFXConfiguration2.CurrentLimits.SupplyCurrentLimit = 30;
+    talonFXConfiguration2.CurrentLimits.SupplyCurrentLimitEnable = true;
+
+    elevatorMotor2.getConfigurator().apply(talonFXConfiguration2);
+    elevatorMotor1.getConfigurator().apply(talonFXConfiguration2);
 
     motorLogger1 = new MotorLogger("/elevator/motor1");
     motorLogger2 = new MotorLogger("/elevator/motor2");
@@ -106,21 +110,21 @@ public class ElevatorSubsystem extends SubsystemBase {
    */
   public void setElevatorPosition(double height) {
 
-    double avgPosition = (-getEncoderLeft() + getEncoderRight()) / 2.0;
-    double deviation = getEncoderRight() + getEncoderLeft();
+    final MotionMagicVoltage request = new MotionMagicVoltage(0);
 
-    // Motion Magic position control
-    MotionMagicVoltage primaryRequest = new MotionMagicVoltage(height);
+    // double avgPosition = (-getEncoderLeft() + getEncoderRight()) / 2.0; // Try using an abs value
+    // for encoder left not negative.
+    // double deviation = getEncoderRight() + getEncoderLeft();
 
-    // Apply correction for synchronization
-    double correctionOutput = deviation * 0.1; // Tune this value
+    // MotionMagic position control
+    // final MotionMagicVoltage request2 = new MotionMagicVoltage(height);
 
     // Apply primary PID for height control
     // double primaryOutput = request.withPosition(height).getReference();
 
     // Set motors with primary control and synchronization correction
-    elevatorMotor1.setControl(primaryRequest.withPosition(-height - correctionOutput));
-    elevatorMotor2.setControl(primaryRequest.withPosition(height + correctionOutput));
+    elevatorMotor1.setControl(request.withPosition(-height));
+    elevatorMotor2.setControl(request.withPosition(height));
   }
 
   // public void setElevatorPosition(ElevatorStates height) {
@@ -177,4 +181,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Left Elevator", getEncoderLeft());
     SmartDashboard.putNumber("Right Elevator", getEncoderRight());
   }
+
+  // Use one encoder and drive motors based on velocity not
+
 }

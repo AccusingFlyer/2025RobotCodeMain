@@ -329,7 +329,7 @@ public final class Constants {
   public final class ElevatorConstants {
     public static final int ELEVATOR_MOTOR_1_ID = 20;
     public static final int ELEVATOR_MOTOR_2_ID = 21;
-    public static final double HUMAN_PLAYER_STATION_MILLIMETERS = 3.9;
+    public static final double HUMAN_PLAYER_STATION_MILLIMETERS = 3.9; // 3.9
     public static final double REEF_LEVEL_1_MILLIMETERS = 5; // 23.5
     public static final double REEF_LEVEL_2_MILLIMETERS = 7.3;
     public static final double REEF_LEVEL_3_MILLIMETERS = 11.1;
@@ -346,7 +346,7 @@ public final class Constants {
     public static final int EFFECTOR_MOTOR_1_ID = 30;
     public static final int EFFECTOR_MOTOR_2_ID = 31;
 
-    public static final double WRIST_HUMAN_PLAYER_INTAKE = 0.65; // 1.35
+    public static final double WRIST_HUMAN_PLAYER_INTAKE = .65; // 0.65
     public static final double WRIST_L4 = -7.75;
     public static final double WRIST_L3 = -8.4;
     public static final double WRIST_ALGAE_POSITION = -4.7;

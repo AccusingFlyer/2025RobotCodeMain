@@ -34,17 +34,17 @@ public class EndEffectorSubsystem extends SubsystemBase {
         6.5; // Target acceleration of 160 rps/s (0.5 seconds) 60
     motionMagicConfigs.MotionMagicJerk = 0.0; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 60;
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     wristMotor.getConfigurator().apply(talonFXConfigs);
 
     var talonFXConfiguration1 = new TalonFXConfiguration();
 
-    talonFXConfiguration1.CurrentLimits.StatorCurrentLimit = 130;
+    talonFXConfiguration1.CurrentLimits.StatorCurrentLimit = 60;
     talonFXConfiguration1.CurrentLimits.StatorCurrentLimitEnable = true;
 
-    talonFXConfiguration1.CurrentLimits.SupplyCurrentLimit = 75;
+    talonFXConfiguration1.CurrentLimits.SupplyCurrentLimit = 30;
     talonFXConfiguration1.CurrentLimits.SupplyCurrentLimitEnable = true;
 
     powerMotor.getConfigurator().apply(talonFXConfiguration1);
