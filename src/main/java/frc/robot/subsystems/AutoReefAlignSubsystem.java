@@ -3,7 +3,6 @@ package frc.robot.subsystems;
 import static frc.robot.settings.Constants.Vision.APRILTAG_LIMELIGHTC_NAME;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableEntry;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -22,7 +21,7 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
   public double desiredYOffset = 5.0;
 
   public AutoReefAlignSubsystem(
-      Limelight Limelight, DrivetrainSubsystem Drive /*EndEffectorSubsystem endEffector */) {
+      Limelight Limelight, DrivetrainSubsystem Drive /* EndEffectorSubsystem endEffector */) {
     this.Limelight = Limelight;
     this.Drive = Drive;
     // this.endEffector = endEffector;
@@ -37,98 +36,135 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
           pipeline.setNumber(0);
 
           // check against 'tv' before aligning
-          double tv = table.getEntry("tv").getDouble(0);
+          double tv = table.getEntry("ty").getDouble(0);
           double tx = table.getEntry("tx").getDouble(0);
-          double ty = table.getEntry("ty").getDouble(0);
+          double ty = table.getEntry("ta").getDouble(0);
 
           double[] poseArray =
               table.getEntry("targetpose_cameraspace").getDoubleArray(new double[6]);
 
           double angleError = 0.0;
-          if (poseArray.length >= 6) {
+          if (poseArray.length == 0) {
+            System.out.println("Align: Empty limelight pose array");
+          } else {
             angleError = poseArray[5];
           }
 
-          if (tv < 0.999) {
-            Drive.drive(new Translation2d(0, 0), 0, false, true);
+          double ySpeed = 0.0;
+          double xSpeed = 0.0;
+          double rotSpeed = 0.0;
+
+          float KpStrafe = -0.005f;
+          float kpRotate = -0.005f;
+          // float kpRotation = -0.01f;
+
+          rotSpeed = (kpRotate * (angleError));
+          ySpeed =
+              -(KpStrafe * (tx)); // tx = horizontal error, strafe direction in robot coordinates
+          xSpeed = (KpStrafe * (/*leftReefOffset -*/ ty + 9));
+
+          if (rotSpeed > 0.10) {
+            rotSpeed = 0.10;
+          } else if (rotSpeed < -0.10) {
+            rotSpeed = -0.10;
           }
 
-          double KpStrafe = 0.02;
-          double kpForward = 0.02;
-          double kpRotation = 0.02;
+          // if (xSpeed > 0.075) {
+          //   xSpeed = 0.075;
+          // } else if (xSpeed < -0.075) {
+          //   xSpeed = -0.075;
+          // }
+          if (ySpeed > 0.1) {
+            ySpeed = 0.1;
+          } else if (ySpeed < -0.1) {
+            ySpeed = -0.1;
+          }
 
-          double horizontalError = tx - leftReefOffset;
-          double forwardError = ty - desiredYOffset;
+          if (tv < 0.9999) {
+            xSpeed = 0;
+            ySpeed = 0;
+            rotSpeed = 0;
+          }
 
-          double strafeSpeed = KpStrafe * horizontalError;
-          double forwardSpeed = kpForward * forwardError;
-          double rotSpeed = kpRotation * angleError;
+          Drive.drive(xSpeed * 10, -ySpeed * 10, -ySpeed * 3, false, false);
 
-          strafeSpeed = MathUtil.clamp(strafeSpeed, -0.2, 0.2);
-          forwardSpeed = MathUtil.clamp(strafeSpeed, -0.2, 0.2);
-          rotSpeed = MathUtil.clamp(strafeSpeed, -0.3, 0.3);
+          // double KpStrafe = -0.02;
+          // double kpForward = 0.02;
+          // double kpRotation = 0.02;
 
-          // double yawCalculated = (Math.signum(Drive.m_gyro.getYaw()) * Math.PI) -
-          // (Math.toRadians(Drive.m_gyro.getYaw()));
+          // double horizontalError = tx - leftReefOffset;
+          // double forwardError = ty - desiredYOffset;
 
-          // double kpTurn = 0.25;
-          Drive.drive(new Translation2d(forwardSpeed, strafeSpeed), rotSpeed, false, true);
+          // double strafeSpeed = KpStrafe * horizontalError;
+          // double forwardSpeed = kpForward * forwardError;
+          // double rotSpeed = kpRotation * angleError;
+
+          // strafeSpeed = MathUtil.clamp(strafeSpeed, -0.2, 0.2);
+          // forwardSpeed = MathUtil.clamp(strafeSpeed, -0.2, 0.2);
+          // rotSpeed = MathUtil.clamp(strafeSpeed, -0.3, 0.3);
+
+          // // double yawCalculated = (Math.signum(Drive.m_gyro.getYaw()) * Math.PI) -
+          // // (Math.toRadians(Drive.m_gyro.getYaw()));
+
+          // // double kpTurn = 0.25;
+          // Drive.drive(forwardSpeed, strafeSpeed, rotSpeed, false, false);
 
           // if (Math.abs(Math.toDegrees(yawCalculated)) > 1 || Math.abs(xError) > .25){
           // rot = MathUtil.clamp((kpTurn * yawCalculated) + .05, -0.25, 0.25);
 
           // rotSpeed = (KpStrafe * (angleError));
           // ySpeed =
-          //     -(KpStrafe
-          //         * (leftReefOffset
-          //             - tx)); // tx = horizontal error, strafe direction in robot coordinates
+          // -(KpStrafe
+          // * (leftReefOffset
+          // - tx)); // tx = horizontal error, strafe direction in robot coordinates
           // xSpeed = (KpStrafe * (ty));
           // }
 
           // rotSpeed = (KpStrafe * (angleError));
           // ySpeed =
-          //     -(KpStrafe * (tx)); // tx = horizontal error, strafe direction in robot coordinates
+          // -(KpStrafe * (tx)); // tx = horizontal error, strafe direction in robot
+          // coordinates
           // xSpeed = (KpStrafe * (ty));
 
           // if (rotSpeed > 0.25) {
-          //   rotSpeed = 0.5;
+          // rotSpeed = 0.5;
           // } else if (rotSpeed < -0.25) {
-          //   rotSpeed = -0.25;
+          // rotSpeed = -0.25;
           // }
 
           // if (xSpeed > 0.75) {
-          //   xSpeed = 0.75;
+          // xSpeed = 0.75;
           // } else if (xSpeed < -0.75) {
-          //   xSpeed = -0.75;
+          // xSpeed = -0.75;
           // }
           // if (ySpeed > 0.1) {
-          //   ySpeed = 0.1;
+          // ySpeed = 0.1;
           // } else if (ySpeed < -0.1) {
-          //   ySpeed = -0.1;
+          // ySpeed = -0.1;
           // }
 
           // if (tv < 0.9999) {
-          //   xSpeed = 0;
-          //   ySpeed = 0;
-          //   rotSpeed = 0;
+          // xSpeed = 0;
+          // ySpeed = 0;
+          // rotSpeed = 0;
           // }
 
           // Drive.drive(new Translation2d(0, ySpeed), rotSpeed, false, true);
 
           // if ((tv > 0.9999)
-          //     && (Math.abs(rotSpeed) < 0.025)
-          //     && (Math.abs(xSpeed) < 0.025)
-          //     && (Math.abs(ySpeed) < 0.025)) {
-          //   // Commands.runOnce(() -> {
+          // && (Math.abs(rotSpeed) < 0.025)
+          // && (Math.abs(xSpeed) < 0.025)
+          // && (Math.abs(ySpeed) < 0.025)) {
+          // // Commands.runOnce(() -> {
 
-          //   // }, Intake);
+          // // }, Intake);
           // }
 
           // debug test
           System.out.printf("Rot, X, Y Speeds");
           System.out.printf("%f\n", rotSpeed);
-          System.out.printf("%f\n", forwardSpeed);
-          System.out.printf("%f\n", strafeSpeed);
+          System.out.printf("%f\n", xSpeed);
+          System.out.printf("%f\n", ySpeed);
         });
   }
 
@@ -153,10 +189,6 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
             angleError = poseArray[5];
           }
 
-          if (tv < 0.999) {
-            Drive.drive(new Translation2d(0, 0), 0, false, true);
-          }
-
           double KpStrafe = 0.02;
           double kpForward = 0.02;
           double kpRotation = 0.02;
@@ -172,60 +204,66 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
           forwardSpeed = MathUtil.clamp(strafeSpeed, -0.2, 0.2);
           rotSpeed = MathUtil.clamp(strafeSpeed, -0.3, 0.3);
 
+          if (tv < 1.000) {
+            Drive.drive(0, 0, 0, false, true);
+            return; // Exit early if no target is detected
+          }
+
           // double yawCalculated = (Math.signum(Drive.m_gyro.getYaw()) * Math.PI) -
           // (Math.toRadians(Drive.m_gyro.getYaw()));
 
           // double kpTurn = 0.25;
-          Drive.drive(new Translation2d(forwardSpeed, strafeSpeed), rotSpeed, false, true);
+          Drive.drive(forwardSpeed, strafeSpeed, rotSpeed, false, true);
 
           // if (Math.abs(Math.toDegrees(yawCalculated)) > 1 || Math.abs(xError) > .25){
           // rot = MathUtil.clamp((kpTurn * yawCalculated) + .05, -0.25, 0.25);
 
           // rotSpeed = (KpStrafe * (angleError));
           // ySpeed =
-          //     -(KpStrafe
-          //         * (leftReefOffset
-          //             - tx)); // tx = horizontal error, strafe direction in robot coordinates
+          // -(KpStrafe
+          // * (leftReefOffset
+          // - tx)); // tx = horizontal error, strafe direction in robot coordinates
           // xSpeed = (KpStrafe * (ty));
           // }
 
           // rotSpeed = (KpStrafe * (angleError));
           // ySpeed =
-          //     -(KpStrafe * (tx)); // tx = horizontal error, strafe direction in robot coordinates
+          // -(KpStrafe * (tx)); // tx = horizontal error, strafe direction in robot
+          // coordinates
           // xSpeed = (KpStrafe * (ty));
 
           // if (rotSpeed > 0.25) {
-          //   rotSpeed = 0.5;
+          // rotSpeed = 0.5;
           // } else if (rotSpeed < -0.25) {
-          //   rotSpeed = -0.25;
+          // rotSpeed = -0.25;
           // }
 
           // if (xSpeed > 0.75) {
-          //   xSpeed = 0.75;
+          // xSpeed = 0.75;
           // } else if (xSpeed < -0.75) {
-          //   xSpeed = -0.75;
+          // xSpeed = -0.75;
           // }
           // if (ySpeed > 0.1) {
-          //   ySpeed = 0.1;
+          // ySpeed = 0.1;
           // } else if (ySpeed < -0.1) {
-          //   ySpeed = -0.1;
+          // ySpeed = -0.1;
           // }
 
           // if (tv < 0.9999) {
-          //   xSpeed = 0;
-          //   ySpeed = 0;
-          //   rotSpeed = 0;
+          // xSpeed = 0;
+          // ySpeed = 0;
+          // rotSpeed = 0;
           // }
 
           // Drive.drive(new Translation2d(0, ySpeed), rotSpeed, false, true);
 
           // if ((tv > 0.9999)
-          //     && (Math.abs(rotSpeed) < 0.025)
-          //     && (Math.abs(xSpeed) < 0.025)
-          //     && (Math.abs(ySpeed) < 0.025)) {
-          //   // Commands.runOnce(() -> {
+          // && (Math.abs(rotSpeed) < 0.025)
+          // && (Math.abs(xSpeed) < 0.025)
+          // && (Math.abs(ySpeed) < 0.025)) {
+          // // Commands.runOnce(() -> {
 
-          //   // }, Intake);
+          // // }, Intake);
           // }
 
           // debug test

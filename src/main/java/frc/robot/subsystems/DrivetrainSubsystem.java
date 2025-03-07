@@ -8,13 +8,13 @@ import com.pathplanner.lib.util.PathPlannerLogging;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -91,14 +91,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
   }
 
   public void drive(
-      Translation2d translation, double rotation, boolean fieldRelative, boolean isOpenLoop) {
+      double xSpeed, double ySpeed, double rotation, boolean fieldRelative, boolean isOpenLoop) {
 
     // Convert the translation and rotation into ChassisSpeeds
     ChassisSpeeds chassisSpeeds =
         fieldRelative
-            ? ChassisSpeeds.fromFieldRelativeSpeeds(
-                translation.getX(), translation.getY(), rotation, getHeading())
-            : new ChassisSpeeds(translation.getX(), translation.getY(), rotation);
+            ? ChassisSpeeds.fromFieldRelativeSpeeds(xSpeed, ySpeed, rotation, getHeading())
+            : new ChassisSpeeds(xSpeed, ySpeed, rotation);
 
     // Apply anti-tip logic to the chassis speeds
     chassisSpeeds = applyAntiTipLogic(chassisSpeeds);
@@ -143,6 +142,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
     }
 
     return chassisSpeeds;
+  }
+
+  public ChassisSpeeds invertChassisSpeeds(ChassisSpeeds chassisSpeeds) {
+    return new ChassisSpeeds(
+        -chassisSpeeds.vxMetersPerSecond,
+        -chassisSpeeds.vyMetersPerSecond,
+        -chassisSpeeds.omegaRadiansPerSecond);
   }
   /* Used by SwerveControllerCommand in Auto */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
@@ -302,6 +308,29 @@ public class DrivetrainSubsystem extends SubsystemBase {
         getGyroscopeRotation(),
         getModulePositions(),
         new Pose2d(getPose().getTranslation(), new Rotation2d()));
+    // swervePoseEstimator.resetPosition(getGyroYaw(), getModulePositions(), new
+    // Pose2d(getPose().getTranslation(), new Rotation2d()));
+  }
+
+  public void resetOdometry(Pose2d pose) {
+    odometer.resetPosition(getGyroscopeRotation(), getModulePositions(), pose);
+    // swervePoseEstimator.resetPosition(getGyroYaw(), getModulePositions(), new
+    // Pose2d(getPose().getTranslation(), new Rotation2d()));
+  }
+
+  public void zeroGyroscope() {
+    if (DriverStation.getAlliance().isPresent()
+        && DriverStation.getAlliance().get() == DriverStation.Alliance.Red) {
+      zeroGyroscope(180);
+    } else {
+      zeroGyroscope(0);
+    }
+    // swervePoseEstimator.resetPosition(getGyroYaw(), getModulePositions(), new
+    // Pose2d(getPose().getTranslation(), new Rotation2d()));
+  }
+
+  public void zeroGyroscope(double angleDeg) {
+    resetOdometry(new Pose2d(getPose().getTranslation(), Rotation2d.fromDegrees(angleDeg)));
     // swervePoseEstimator.resetPosition(getGyroYaw(), getModulePositions(), new
     // Pose2d(getPose().getTranslation(), new Rotation2d()));
   }

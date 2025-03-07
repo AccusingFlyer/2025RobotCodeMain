@@ -9,6 +9,38 @@
           "data": {
             "pathName": "Middle Start to G"
           }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 6.0
+                      }
+                    },
+                    {
+                      "type": "path",
+                      "data": {
+                        "pathName": "flick"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
+          }
         }
       ]
     }

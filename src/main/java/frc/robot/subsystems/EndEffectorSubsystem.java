@@ -37,6 +37,8 @@ public class EndEffectorSubsystem extends SubsystemBase {
     talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
 
+    // talonFXConfigs.Feedback.withSensorToMechanismRatio(22.5);
+
     wristMotor.getConfigurator().apply(talonFXConfigs);
 
     var talonFXConfiguration1 = new TalonFXConfiguration();

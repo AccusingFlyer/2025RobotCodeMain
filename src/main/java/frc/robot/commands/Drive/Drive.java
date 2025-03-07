@@ -3,7 +3,6 @@ package frc.robot.commands.Drive;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.settings.Constants;
@@ -69,9 +68,16 @@ public class Drive extends Command {
       rotationMaintenanceSetpoint = s_Swerve.getPose().getRotation();
     }
 
-    /* Drive */
+    // /* Drive */
+    // s_Swerve.drive(
+    //     new Translation2d(translationVal, strafeVal).times(Constants.DriveConstants.maxSpeed),
+    //     rotationSpeedOmega,
+    //     !robotCentricSup,
+    //     true);
+
     s_Swerve.drive(
-        new Translation2d(translationVal, strafeVal).times(Constants.DriveConstants.maxSpeed),
+        translationVal * Constants.DriveConstants.maxSpeed,
+        strafeVal * Constants.DriveConstants.maxSpeed,
         rotationSpeedOmega,
         !robotCentricSup,
         true);

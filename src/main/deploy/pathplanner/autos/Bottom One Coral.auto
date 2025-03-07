@@ -5,9 +5,33 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "Zero Yaw"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "Bottom Start to F"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "L4"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score Coral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Score Coral"
           }
         }
       ]

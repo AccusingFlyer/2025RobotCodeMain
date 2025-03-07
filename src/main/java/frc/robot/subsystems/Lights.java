@@ -44,12 +44,57 @@ public class Lights extends SubsystemBase {
 
   }
 
-  public Command setColor() {
+  public Command setPurple() {
     return run(
         () -> {
-          LEDSegment.MainStrip.setBandAnimation(purple, 0.8);
+          LEDSegment.MainStrip.setColor(purple);
 
-          LEDSegment.InternalLEDs.setBandAnimation(yellow, 0.8);
+          LEDSegment.InternalLEDs.setColor(purple);
+        });
+  }
+
+  public Command setGreen() {
+    return run(
+        () -> {
+          LEDSegment.MainStrip.setColor(green);
+
+          LEDSegment.InternalLEDs.setColor(green);
+        });
+  }
+
+  public Command setRed() {
+    return run(
+        () -> {
+          LEDSegment.MainStrip.setColor(red);
+
+          LEDSegment.InternalLEDs.setColor(red);
+        });
+  }
+
+  public Command setYellow() {
+    return run(
+        () -> {
+          LEDSegment.MainStrip.setColor(yellow);
+
+          LEDSegment.InternalLEDs.setColor(yellow);
+        });
+  }
+
+  public Command setBlue() {
+    return run(
+        () -> {
+          LEDSegment.MainStrip.setColor(blue);
+
+          LEDSegment.InternalLEDs.setColor(blue);
+        });
+  }
+
+  public Command strobeYellow() {
+    return run(
+        () -> {
+          LEDSegment.MainStrip.setFlowAnimation(yellow, 0.9);
+
+          LEDSegment.InternalLEDs.setFlowAnimation(yellow, 0.9);
         });
   }
 

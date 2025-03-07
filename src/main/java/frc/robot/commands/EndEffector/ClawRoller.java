@@ -6,6 +6,7 @@ import frc.robot.subsystems.EndEffectorSubsystem;
 public class ClawRoller extends Command {
   private EndEffectorSubsystem roller;
   private double volts;
+  // Lights lights;
 
   public ClawRoller(EndEffectorSubsystem roller, double volts) {
     this.roller = roller;
@@ -20,6 +21,7 @@ public class ClawRoller extends Command {
   @Override
   public void execute() {
     roller.setPowerVolts(volts);
+    // lights.setRed();
   }
 
   @Override

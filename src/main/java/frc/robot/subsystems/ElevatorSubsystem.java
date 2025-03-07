@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import static frc.robot.settings.Constants.ElevatorConstants.*;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
@@ -27,6 +28,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
   private TalonFX elevatorMotor2 = new TalonFX(ELEVATOR_MOTOR_2_ID);
 
+  private MotionMagicVoltage elevatorControl = new MotionMagicVoltage(0);
+
   public ElevatorSubsystem() {
 
     var talonFXConfigs = new TalonFXConfiguration();
@@ -45,18 +48,13 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Primary PID - Height Control
     var slot0Configs = talonFXConfigs.Slot0;
-    slot0Configs.kP = 1.8;
-    slot0Configs.kI = 0.0;
-    slot0Configs.kD = 1.5;
-    slot0Configs.kS = 0.30;
-    slot0Configs.kG = 0.60;
-    slot0Configs.kV = 2;
-    slot0Configs.kA = 1;
+    slot0Configs.kP = 2.0;
+    slot0Configs.kG = 0.50;
 
     var motionMagicConfigs = talonFXConfigs.MotionMagic;
-    motionMagicConfigs.MotionMagicCruiseVelocity = 5.9; // Target cruise velocity of 80 rps
+    motionMagicConfigs.MotionMagicCruiseVelocity = 50; // Target cruise velocity of 80 rps
     motionMagicConfigs.MotionMagicAcceleration =
-        7.2; // Target acceleration of 160 rps/s (0.5 seconds) 60
+        23; // Target acceleration of 160 rps/s (0.5 seconds) 60
     motionMagicConfigs.MotionMagicJerk = 0; // Target jerk of 1600 rps/s/s (0.1 seconds)
 
     // .withMotionMagic(new MotionMagicConfigs()
@@ -76,6 +74,10 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
     talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;
+
+    talonFXConfigs.MotorOutput.withNeutralMode(NeutralModeValue.Brake);
+
+    elevatorMotor1.setControl(new Follower(ELEVATOR_MOTOR_2_ID, true));
 
     elevatorMotor1.getConfigurator().apply(talonFXConfigs);
     elevatorMotor2.getConfigurator().apply(talonFXConfigs);
@@ -107,7 +109,7 @@ public class ElevatorSubsystem extends SubsystemBase {
    */
   public void setElevatorPosition(double setpoint) {
 
-    final MotionMagicVoltage request = new MotionMagicVoltage(0);
+    elevatorControl.withPosition(setpoint);
 
     // double avgPosition = (-getEncoderLeft() + getEncoderRight()) / 2.0; // Try using an abs value
     // for encoder left not negative.
@@ -120,8 +122,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     // double primaryOutput = request.withPosition(height).getReference();
 
     // Set motors with primary control and synchronization correction
-    elevatorMotor1.setControl(request.withPosition(-setpoint));
-    elevatorMotor2.setControl(request.withPosition(setpoint));
+
+    elevatorMotor2.setControl(elevatorControl);
   }
 
   // public void setElevatorPosition(ElevatorStates height) {
@@ -144,9 +146,9 @@ public class ElevatorSubsystem extends SubsystemBase {
   //   }
   // }
 
-  public boolean isElevatorAtPose() {
-    return elevatorMotor1.getClosedLoopError().getValueAsDouble() < ELEVATOR_THRESHOLD;
-  }
+  // public boolean isElevatorAtPose() {
+  //   return elevatorMotor1.getClosedLoopError().getValueAsDouble() < ELEVATOR_THRESHOLD;
+  // }
 
   public void setMotors(double speed1, double speed2) {
     elevatorMotor1.set(-speed1);
