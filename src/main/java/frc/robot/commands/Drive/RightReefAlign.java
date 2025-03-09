@@ -12,10 +12,10 @@ public class RightReefAlign extends Command {
   private Timer dontSeeTagTimer, stopTimer;
   private DrivetrainSubsystem drive;
 
-  public RightReefAlign(boolean isRightScore, DrivetrainSubsystem drive) {
+  public RightReefAlign(DrivetrainSubsystem drive) {
     xController = new PIDController(2.5, 0, 0); // Vertical movement
-    yController = new PIDController(4.5, 0, 0); // Horitontal movement
-    rotController = new PIDController(0.05, 0, 0); // Rotation
+    yController = new PIDController(2.5, 0, 0); // Horitontal movement
+    rotController = new PIDController(0.025, 0, 0); // Rotation
 
     this.drive = drive;
     addRequirements(drive);
@@ -28,14 +28,14 @@ public class RightReefAlign extends Command {
     this.dontSeeTagTimer = new Timer();
     this.dontSeeTagTimer.start();
 
-    rotController.setSetpoint(0);
+    rotController.setSetpoint(-16.5);
     rotController.setTolerance(0.5);
 
-    xController.setSetpoint(1.0);
-    xController.setTolerance(0.01);
+    xController.setSetpoint(-0.89);
+    xController.setTolerance(0.8);
 
-    yController.setSetpoint(0.5);
-    yController.setTolerance(0.01);
+    yController.setSetpoint(-0.455);
+    yController.setTolerance(0.8);
   }
 
   @Override
@@ -51,7 +51,7 @@ public class RightReefAlign extends Command {
       double ySpeed = -yController.calculate(postions[0]);
       double rotValue = -rotController.calculate(postions[4]);
 
-      drive.drive(yController.getError() < 0.01 ? xSpeed : 0, ySpeed, rotValue, false, false);
+      drive.drive(-xSpeed, -ySpeed, rotValue, false, true);
 
       if (!rotController.atSetpoint() || !yController.atSetpoint() || !xController.atSetpoint()) {
         stopTimer.reset();

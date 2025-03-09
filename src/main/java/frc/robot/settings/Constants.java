@@ -331,8 +331,8 @@ public final class Constants {
     public static final int ELEVATOR_MOTOR_2_ID = 21;
     public static final double HUMAN_PLAYER_STATION_MILLIMETERS = 3.8; // 3.9
     public static final double REEF_LEVEL_1_MILLIMETERS = 6; // 23.5
-    public static final double REEF_LEVEL_2_MILLIMETERS = 6.6;
-    public static final double REEF_LEVEL_3_MILLIMETERS = 9.5;
+    public static final double REEF_LEVEL_2_MILLIMETERS = 6.15;
+    public static final double REEF_LEVEL_3_MILLIMETERS = 9.65;
     public static final double REEF_LEVEL_4_MILLIMETERS = 15.6;
     public static final double HIGH_ALGAE_HEIGHT = 9.0;
     public static final double LOW_ALGAE_HEIGHT = 5.3;

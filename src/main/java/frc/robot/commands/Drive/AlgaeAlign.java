@@ -7,12 +7,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
-public class LeftReefAlign extends Command {
+public class AlgaeAlign extends Command {
   private PIDController xController, yController, rotController;
   private Timer dontSeeTagTimer, stopTimer;
   private DrivetrainSubsystem drive;
 
-  public LeftReefAlign(DrivetrainSubsystem drive) {
+  public AlgaeAlign(DrivetrainSubsystem drive) {
     xController = new PIDController(2.5, 0, 0); // Vertical movement
     yController = new PIDController(2.5, 0, 0); // Horitontal movement
     rotController = new PIDController(0.025, 0, 0); // Rotation
@@ -28,13 +28,13 @@ public class LeftReefAlign extends Command {
     this.dontSeeTagTimer = new Timer();
     this.dontSeeTagTimer.start();
 
-    rotController.setSetpoint(-16.5);
+    rotController.setSetpoint(-7.04);
     rotController.setTolerance(0.5);
 
-    xController.setSetpoint(-0.89);
+    xController.setSetpoint(-0.95);
     xController.setTolerance(0.8);
 
-    yController.setSetpoint(-0.77);
+    yController.setSetpoint(-0.58);
     yController.setTolerance(0.8);
   }
 

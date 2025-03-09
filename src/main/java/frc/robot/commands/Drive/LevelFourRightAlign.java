@@ -7,17 +7,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.LimelightHelpers;
 import frc.robot.subsystems.DrivetrainSubsystem;
 
-public class LeftReefAlign extends Command {
+public class LevelFourRightAlign extends Command {
   private PIDController xController, yController, rotController;
   private Timer dontSeeTagTimer, stopTimer;
   private DrivetrainSubsystem drive;
 
-  public LeftReefAlign(DrivetrainSubsystem drive) {
+  private boolean hasStartedScoring = false;
+
+  public LevelFourRightAlign(DrivetrainSubsystem drive) {
     xController = new PIDController(2.5, 0, 0); // Vertical movement
     yController = new PIDController(2.5, 0, 0); // Horitontal movement
     rotController = new PIDController(0.025, 0, 0); // Rotation
 
     this.drive = drive;
+
     addRequirements(drive);
   }
 
@@ -31,11 +34,13 @@ public class LeftReefAlign extends Command {
     rotController.setSetpoint(-16.5);
     rotController.setTolerance(0.5);
 
-    xController.setSetpoint(-0.89);
+    xController.setSetpoint(-1.03);
     xController.setTolerance(0.8);
 
-    yController.setSetpoint(-0.77);
+    yController.setSetpoint(-0.46);
     yController.setTolerance(0.8);
+
+    hasStartedScoring = false;
   }
 
   @Override
@@ -56,6 +61,12 @@ public class LeftReefAlign extends Command {
       if (!rotController.atSetpoint() || !yController.atSetpoint() || !xController.atSetpoint()) {
         stopTimer.reset();
       }
+
+      //   if (stopTimer.hasElapsed(2.0) && !hasStartedScoring) {
+      //     hasStartedScoring = true;
+      //     autoScore();
+      //   }
+
     } else {
       drive.drive(0, 0, 0, false, false);
     }
@@ -72,4 +83,20 @@ public class LeftReefAlign extends Command {
     // in the camera
     return this.dontSeeTagTimer.hasElapsed(1) || stopTimer.hasElapsed(0.3);
   }
+
+  //   private void autoScore() {
+  //     new SequentialCommandGroup(
+  //             // Step 1: Start the claw rollers immediately
+  //             new ClawRoller(roller, 5),
+
+  //             // Step 2: Wait 0.3 seconds before starting the flick
+  //             new ParallelRaceGroup(
+  //                 new ClawRoller(roller, -3.5), // Rollers keep rolling
+  //                 new SequentialCommandGroup(
+  //                     new WaitCommand(0.3), // Delay for 0.3 seconds
+  //                     new WristFlickCommand(roller) // Then flick while rollers are still rolling
+  //                     )),
+
+  //         .schedule();
+  //   }
 }

@@ -25,16 +25,23 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.Drive.AlgaeAlign;
 import frc.robot.commands.Drive.Drive;
 import frc.robot.commands.Drive.LeftReefAlign;
+import frc.robot.commands.Drive.LevelFourLeftAlign;
+import frc.robot.commands.Drive.LevelFourRightAlign;
+import frc.robot.commands.Drive.RightReefAlign;
 import frc.robot.commands.Elevator.ElevatorCommand;
 import frc.robot.commands.EndEffector.ClawRoller;
+import frc.robot.commands.EndEffector.WristFlickCommand;
 import frc.robot.commands.EndEffector.WristSetpointCommand;
 // import frc.robot.commands.IntakePowerCommand;
 // import frc.robot.commands.IntakeSetpointCommand;
@@ -82,6 +89,8 @@ public class RobotContainer {
   private SendableChooser<Command> autoChooser = new SendableChooser<>();
   private PowerDistribution PDP;
 
+  private boolean recentReef4HeightPress = false;
+
   RobotState robotState;
   Alliance currentAlliance;
   BooleanSupplier ZeroGyroSup;
@@ -118,6 +127,9 @@ public class RobotContainer {
   boolean RightStickSupplier;
   BooleanSupplier ZeroSupplier;
   BooleanSupplier NormIntake;
+  BooleanSupplier flick;
+  BooleanSupplier L4RightAlign;
+  BooleanSupplier L4LeftAlign;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
@@ -147,6 +159,8 @@ public class RobotContainer {
 
     NormIntake = () -> (driverControllerXbox.getRightTriggerAxis() > 0.1);
     CoralIntakeSup = () -> (driverControllerXbox.getLeftTriggerAxis() > 0.1);
+
+    flick = operatorControllerXbox::getAButton;
     // AlgaeProcessorOuttakeSup = driverControllerXbox::getLeftBumperButton;
     CoralReefScoreSup = driverControllerXbox::getRightBumperButton;
 
@@ -160,6 +174,8 @@ public class RobotContainer {
     removeAlgaeLowSupplier = () -> driverControllerXbox.getPOV() == 180;
     LeftReefLineupSup = () -> operatorControllerXbox.getPOV() == 270;
     RightReefLineupSup = () -> operatorControllerXbox.getPOV() == 90;
+    L4RightAlign = () -> operatorControllerXbox.getPOV() == 0;
+    L4LeftAlign = () -> operatorControllerXbox.getPOV() == 180;
     AlgaeProcessorPositionSup = () -> driverControllerXbox.getPOV() == 90;
     removeAlgaeHighSupplier = () -> driverControllerXbox.getPOV() == 0;
 
@@ -227,7 +243,8 @@ public class RobotContainer {
                 new ParallelCommandGroup(
                     new ParallelCommandGroup(
                         new SequentialCommandGroup(
-                            new WaitCommand(1.0), // Wait 2 seconds before running the wrist command
+                            new WaitCommand(1.0), // Wait 2 seconds before running the wrist
+                            // command
                             new WristSetpointCommand(
                                 endEffector, Constants.EndEffectorConstants.WRIST_L4))),
                     new ParallelCommandGroup(
@@ -291,6 +308,7 @@ public class RobotContainer {
     elevator = new ElevatorSubsystem();
     // elevator.setDefaultCommand(new HoldElevator(elevator));
     // elevator.setDefaultCommand(new HoldElevator(elevator));
+
   }
 
   // private void intakeInst() {
@@ -331,7 +349,8 @@ public class RobotContainer {
                 new SequentialCommandGroup(
                     new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
                     new WristSetpointCommand(
-                        endEffector, Constants.EndEffectorConstants.WRIST_L3))));
+                        endEffector, Constants.EndEffectorConstants.WRIST_L3))))
+        .onTrue(new InstantCommand(() -> recentReef4HeightPress = false));
 
     new Trigger(ReefHeight2Supplier)
         .onTrue(
@@ -340,7 +359,8 @@ public class RobotContainer {
                 new SequentialCommandGroup(
                     new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
                     new WristSetpointCommand(
-                        endEffector, Constants.EndEffectorConstants.WRIST_L3))));
+                        endEffector, Constants.EndEffectorConstants.WRIST_L3))))
+        .onTrue(new InstantCommand(() -> recentReef4HeightPress = false));
 
     new Trigger(ReefHeight3Supplier)
         .onTrue(
@@ -349,7 +369,8 @@ public class RobotContainer {
                 new SequentialCommandGroup(
                     new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
                     new WristSetpointCommand(
-                        endEffector, Constants.EndEffectorConstants.WRIST_L3))));
+                        endEffector, Constants.EndEffectorConstants.WRIST_L3))))
+        .onTrue(new InstantCommand(() -> recentReef4HeightPress = false));
 
     new Trigger(ReefHeight4Supplier)
         .onTrue(
@@ -358,7 +379,8 @@ public class RobotContainer {
                 new SequentialCommandGroup(
                     new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
                     new WristSetpointCommand(
-                        endEffector, Constants.EndEffectorConstants.WRIST_L4))));
+                        endEffector, Constants.EndEffectorConstants.WRIST_L4))))
+        .onTrue(new InstantCommand(() -> recentReef4HeightPress = true));
 
     // new Trigger(ReefA).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.A));
     // new Trigger(ReefB).whileTrue(driveTrain.goToPoint(FieldConstants.Reefs.B));
@@ -413,7 +435,8 @@ public class RobotContainer {
                     new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
                     new WristSetpointCommand(
                         endEffector, Constants.EndEffectorConstants.WRIST_ALGAE_POSITION))))
-        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
+        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER))
+        .whileTrue(new AlgaeAlign(driveTrain));
 
     new Trigger(removeAlgaeLowSupplier)
         .onTrue(
@@ -423,11 +446,57 @@ public class RobotContainer {
                     new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
                     new WristSetpointCommand(
                         endEffector, Constants.EndEffectorConstants.WRIST_ALGAE_POSITION))))
-        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
+        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER))
+        .whileTrue(new AlgaeAlign(driveTrain));
 
-    new Trigger(LeftReefLineupSup).whileTrue(new LeftReefAlign(driveTrain));
+    new Trigger(LeftReefLineupSup)
+        .whileTrue(
+            new ConditionalCommand(
+                new SequentialCommandGroup(
+                    new LevelFourLeftAlign(driveTrain).withTimeout(2.0),
+                    new ParallelCommandGroup(
+                        new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
+                        new SequentialCommandGroup(
+                            new WaitCommand(0.5),
+                            new ProxyCommand(new WristFlickCommand(endEffector))))),
+                new LeftReefAlign(driveTrain),
+                () -> recentReef4HeightPress));
 
-    new Trigger(RightReefLineupSup).whileTrue(reefAlign.rightReefAlign());
+    new Trigger(RightReefLineupSup)
+        .whileTrue(
+            new ConditionalCommand(
+                new SequentialCommandGroup(
+                    new LevelFourRightAlign(driveTrain).withTimeout(2.0),
+                    new ParallelCommandGroup(
+                        new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
+                        new SequentialCommandGroup(
+                            new WaitCommand(0.5),
+                            new ProxyCommand(new WristFlickCommand(endEffector))))),
+                new RightReefAlign(driveTrain),
+                () -> recentReef4HeightPress));
+
+    // new Trigger(L4RightAlign).whileTrue(new LevelFourRightAlign(driveTrain,
+    // endEffector));
+
+    new Trigger(L4LeftAlign)
+        .whileTrue(
+            new SequentialCommandGroup(
+                new LevelFourLeftAlign(driveTrain).withTimeout(2.0),
+                new ParallelCommandGroup(
+                    new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
+                    new SequentialCommandGroup(
+                        new WaitCommand(0.5),
+                        new ProxyCommand(new WristFlickCommand(endEffector))))));
+
+    new Trigger(L4RightAlign)
+        .whileTrue(
+            new SequentialCommandGroup(
+                new LevelFourRightAlign(driveTrain).withTimeout(2.0),
+                new ParallelCommandGroup(
+                    new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
+                    new SequentialCommandGroup(
+                        new WaitCommand(0.5),
+                        new ProxyCommand(new WristFlickCommand(endEffector))))));
 
     new Trigger(AlgaeProcessorPositionSup)
         .onTrue(
@@ -447,6 +516,8 @@ public class RobotContainer {
                     new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
                     new WristSetpointCommand(
                         endEffector, Constants.EndEffectorConstants.WRIST_BARGE_POSITION))));
+
+    new Trigger(flick).onTrue(new WristFlickCommand(endEffector));
   }
 
   // Schedule `exampleMethodCommand` when the Xbox controller's B button is

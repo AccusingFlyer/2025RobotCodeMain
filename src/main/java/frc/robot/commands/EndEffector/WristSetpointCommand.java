@@ -10,6 +10,8 @@ public class WristSetpointCommand extends Command {
   private double setpoint;
   private PIDController pidController = new PIDController(0.030, 0, 0);
 
+  public static double currentSetpoint = 0;
+
   /*
    * From what I could gather running simulations of PIDs on the WPILIB docs, The Integral Values can remain at 0,
    * while adjusting the P values to allow the system to reach the setpoint without oscillation, then adjusting the D value CAREFULLY
@@ -27,6 +29,7 @@ public class WristSetpointCommand extends Command {
   public WristSetpointCommand(EndEffectorSubsystem wrist, double setpoint) {
     this.wrist = wrist;
     this.setpoint = setpoint;
+    currentSetpoint = setpoint;
 
     // pidController.setSetpoint(setpoint);
 
@@ -34,6 +37,10 @@ public class WristSetpointCommand extends Command {
     addRequirements(wrist);
 
     pidController.setTolerance(0);
+  }
+
+  public static double getCurrentSetpoint() {
+    return currentSetpoint;
   }
 
   @Override
