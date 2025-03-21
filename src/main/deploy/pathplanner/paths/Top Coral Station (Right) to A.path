@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.6662909836065571,
-        "y": 7.375563524590164
+        "x": 1.503,
+        "y": 7.706
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.8912464251796273,
-        "y": 7.220277909936379
+        "x": 1.72795544157307,
+        "y": 7.5507143853462155
       },
       "isLocked": false,
       "linkedName": "Top Coral Station (Right)"
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.0,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 4.5,
+    "maxAcceleration": 4.3,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 880.0,
     "nominalVoltage": 12.0,
@@ -48,7 +48,7 @@
   "folder": "Quarter Pounder",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -52.74558013148374
+    "rotation": -74.69873946428524
   },
   "useDefaultConstraints": true
 }

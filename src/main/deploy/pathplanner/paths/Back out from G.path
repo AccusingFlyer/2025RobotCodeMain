@@ -3,29 +3,29 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.5025684931506849,
-        "y": 0.39629708904109634
+        "x": 5.695,
+        "y": 3.75
       },
       "prevControl": null,
       "nextControl": {
-        "x": 1.1635355595218595,
-        "y": 0.1344491199813364
+        "x": 5.445003923500181,
+        "y": 3.751400619397572
       },
       "isLocked": false,
-      "linkedName": "first bottom coral station"
+      "linkedName": null
     },
     {
       "anchor": {
-        "x": 3.7864726027397264,
-        "y": 2.725278253424658
+        "x": 6.3708904109589035,
+        "y": 3.75
       },
       "prevControl": {
-        "x": 3.278212421344517,
-        "y": 2.3528836220927474
+        "x": 6.779940788714857,
+        "y": 3.7477082684588865
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": "D"
+      "linkedName": null
     }
   ],
   "rotationTargets": [],
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 75.46554491945989
+    "rotation": 180.0
   },
   "reversed": false,
-  "folder": "Reverse Quarter Pounder",
+  "folder": "1 coral",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 59.03624346792642
+    "rotation": 180.0
   },
   "useDefaultConstraints": true
 }

@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.6662909836065571,
-        "y": 7.375563524590164
+        "x": 1.503,
+        "y": 7.706
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.1120769657074674,
-        "y": 6.99414254320682
+        "x": 1.9487859821009101,
+        "y": 7.324579018616657
       },
       "isLocked": false,
       "linkedName": "Top Coral Station (Right)"
     },
     {
       "anchor": {
-        "x": 4.039856557377049,
-        "y": 5.25373975409836
+        "x": 3.8616010273972603,
+        "y": 5.4449272260273975
       },
       "prevControl": {
-        "x": 3.50051039400932,
-        "y": 5.721596359801556
+        "x": 3.3222548640295315,
+        "y": 5.912783831730593
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.0,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 4.5,
+    "maxAcceleration": 4.3,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 880.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -61.22211509725219
+    "rotation": -81.75218456432015
   },
   "reversed": false,
   "folder": "Quarter Pounder",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -52.74558013148374
+    "rotation": -74.69873946428524
   },
   "useDefaultConstraints": true
 }

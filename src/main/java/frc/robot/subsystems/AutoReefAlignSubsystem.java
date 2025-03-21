@@ -61,7 +61,7 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
           rotSpeed = (kpRotate * (angleError));
           ySpeed =
               -(KpStrafe * (tx)); // tx = horizontal error, strafe direction in robot coordinates
-          xSpeed = (KpStrafe * (/*leftReefOffset -*/ ty + 9));
+          xSpeed = (KpStrafe * (/* leftReefOffset - */ ty + 9));
 
           if (rotSpeed > 0.10) {
             rotSpeed = 0.10;
@@ -70,9 +70,9 @@ public class AutoReefAlignSubsystem extends SubsystemBase {
           }
 
           // if (xSpeed > 0.075) {
-          //   xSpeed = 0.075;
+          // xSpeed = 0.075;
           // } else if (xSpeed < -0.075) {
-          //   xSpeed = -0.075;
+          // xSpeed = -0.075;
           // }
           if (ySpeed > 0.1) {
             ySpeed = 0.1;

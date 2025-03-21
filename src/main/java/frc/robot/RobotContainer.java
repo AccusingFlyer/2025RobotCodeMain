@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import static frc.robot.settings.Constants.ElevatorConstants.HUMAN_PLAYER_STATION_MILLIMETERS;
 import static frc.robot.settings.Constants.xboxDriver.DRIVE_CONTROLLER_ID;
 import static frc.robot.settings.Constants.xboxDriver.OPERATOR_CONTROLLER_ID;
 import static frc.robot.settings.Constants.xboxDriver.X_AXIS;
@@ -33,7 +32,6 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.Drive.AlgaeAlign;
 import frc.robot.commands.Drive.Drive;
 import frc.robot.commands.Drive.LeftReefAlign;
 import frc.robot.commands.Drive.LevelFourLeftAlign;
@@ -41,10 +39,12 @@ import frc.robot.commands.Drive.LevelFourRightAlign;
 import frc.robot.commands.Drive.RightReefAlign;
 import frc.robot.commands.Elevator.ElevatorCommand;
 import frc.robot.commands.EndEffector.ClawRoller;
-import frc.robot.commands.EndEffector.WristFlickCommand;
-import frc.robot.commands.EndEffector.WristSetpointCommand;
+import frc.robot.commands.EndEffector.FlickDownCommand;
 // import frc.robot.commands.IntakePowerCommand;
 // import frc.robot.commands.IntakeSetpointCommand;
+import frc.robot.commands.EndEffector.FlickUpCommand;
+import frc.robot.commands.EndEffector.WristFlickCommand;
+import frc.robot.commands.EndEffector.WristSetpointCommand;
 import frc.robot.settings.Constants;
 import frc.robot.settings.Constants.Vision;
 import frc.robot.subsystems.AutoReefAlignSubsystem;
@@ -125,11 +125,13 @@ public class RobotContainer {
   DoubleSupplier ControllerXAxisSupplier;
   DoubleSupplier ControllerZAxisSupplier;
   boolean RightStickSupplier;
+  BooleanSupplier RightStickButtonSupplier;
   BooleanSupplier ZeroSupplier;
   BooleanSupplier NormIntake;
   BooleanSupplier flick;
   BooleanSupplier L4RightAlign;
   BooleanSupplier L4LeftAlign;
+  BooleanSupplier backupIntake;
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
 
@@ -150,19 +152,19 @@ public class RobotContainer {
     driverControllerXbox = new XboxController(DRIVE_CONTROLLER_ID);
     operatorControllerXbox = new XboxController(OPERATOR_CONTROLLER_ID);
 
-    ControllerXAxisSupplier = () -> driverControllerXbox.getRawAxis(X_AXIS);
-    ControllerYAxisSupplier = () -> driverControllerXbox.getRawAxis(Y_AXIS);
-    ControllerZAxisSupplier = () -> driverControllerXbox.getRawAxis(Z_AXIS);
+    ControllerXAxisSupplier = () -> -driverControllerXbox.getRawAxis(X_AXIS);
+    ControllerYAxisSupplier = () -> -driverControllerXbox.getRawAxis(Y_AXIS);
+    ControllerZAxisSupplier = () -> -driverControllerXbox.getRawAxis(Z_AXIS);
     RightStickSupplier = driverControllerXbox.getRightStickButton();
 
     ZeroGyroSup = driverControllerXbox::getStartButton;
 
-    NormIntake = () -> (driverControllerXbox.getRightTriggerAxis() > 0.1);
+    CoralReefScoreSup = () -> (driverControllerXbox.getRightTriggerAxis() > 0.1);
     CoralIntakeSup = () -> (driverControllerXbox.getLeftTriggerAxis() > 0.1);
 
     flick = operatorControllerXbox::getAButton;
     // AlgaeProcessorOuttakeSup = driverControllerXbox::getLeftBumperButton;
-    CoralReefScoreSup = driverControllerXbox::getRightBumperButton;
+    // CoralReefScoreSup = driverControllerXbox::getRightBumperButton;
 
     ReefHeight1Supplier = driverControllerXbox::getXButton;
     ReefHeight2Supplier = driverControllerXbox::getYButton;
@@ -170,16 +172,18 @@ public class RobotContainer {
     ReefHeight4Supplier = driverControllerXbox::getAButton;
 
     ZeroSupplier = driverControllerXbox::getLeftStickButton;
+    RightStickButtonSupplier = driverControllerXbox::getRightStickButton;
 
     removeAlgaeLowSupplier = () -> driverControllerXbox.getPOV() == 180;
-    LeftReefLineupSup = () -> operatorControllerXbox.getPOV() == 270;
-    RightReefLineupSup = () -> operatorControllerXbox.getPOV() == 90;
+    LeftReefLineupSup = driverControllerXbox::getLeftBumperButton;
+    RightReefLineupSup = driverControllerXbox::getRightBumperButton;
     L4RightAlign = () -> operatorControllerXbox.getPOV() == 0;
     L4LeftAlign = () -> operatorControllerXbox.getPOV() == 180;
     AlgaeProcessorPositionSup = () -> driverControllerXbox.getPOV() == 90;
     removeAlgaeHighSupplier = () -> driverControllerXbox.getPOV() == 0;
 
     BargeHeightSupplier = () -> driverControllerXbox.getPOV() == 270;
+    backupIntake = () -> (operatorControllerXbox.getLeftTriggerAxis() > 0.1);
     // ReefA =
     // () ->
     // (driverControllerXbox.getRightTriggerAxis() > 0.1)
@@ -238,24 +242,28 @@ public class RobotContainer {
     NamedCommands.registerCommand(
         "L4",
         new ParallelCommandGroup(
-            new ElevatorCommand(elevator, Constants.ElevatorConstants.REEF_LEVEL_4_MILLIMETERS),
-            new ParallelCommandGroup(
-                new ParallelCommandGroup(
-                    new ParallelCommandGroup(
-                        new SequentialCommandGroup(
-                            new WaitCommand(1.0), // Wait 2 seconds before running the wrist
-                            // command
-                            new WristSetpointCommand(
-                                endEffector, Constants.EndEffectorConstants.WRIST_L4))),
-                    new ParallelCommandGroup(
-                        new SequentialCommandGroup(
-                            new WaitCommand(5.0),
-                            new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER)
-                                .withTimeout(5.0)))))));
+                new ElevatorCommand(elevator, Constants.ElevatorConstants.REEF_LEVEL_4_MILLIMETERS),
+                new SequentialCommandGroup(
+                    new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
+                    new WristSetpointCommand(endEffector, Constants.EndEffectorConstants.WRIST_L4)))
+            .withTimeout(4.0));
 
     NamedCommands.registerCommand(
-        "Score Coral",
-        new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER).withTimeout(2.5));
+        "L4 Wrist",
+        new ParallelCommandGroup(
+                new WristSetpointCommand(endEffector, Constants.EndEffectorConstants.WRIST_L4),
+                new SequentialCommandGroup(
+                    new WaitCommand(0.5),
+                    new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER)))
+            .withTimeout(1.5));
+
+    NamedCommands.registerCommand("Flick Up", new FlickUpCommand(endEffector));
+
+    NamedCommands.registerCommand(
+        "Flick Down", new ProxyCommand(() -> new FlickDownCommand(endEffector)));
+
+    NamedCommands.registerCommand(
+        "Score Coral", new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER));
 
     NamedCommands.registerCommand(
         "Intake Coral Position",
@@ -269,9 +277,39 @@ public class RobotContainer {
         "Intake Claw Roller",
         new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
 
+    NamedCommands.registerCommand("Left Reef Auto Align", new LevelFourLeftAlign(driveTrain));
+
+    NamedCommands.registerCommand("Right Reef Auto Align", new LevelFourRightAlign(driveTrain));
+
     NamedCommands.registerCommand("Zero Yaw", new InstantCommand(driveTrain::zeroHeading));
 
     NamedCommands.registerCommand("Stop Intake Claw Roller", new ClawRoller(endEffector, 0));
+
+    NamedCommands.registerCommand(
+        "Zero Pos",
+        new ParallelCommandGroup(
+                new ElevatorCommand(elevator, 0), new WristSetpointCommand(endEffector, 0))
+            .withTimeout(3.0));
+
+    NamedCommands.registerCommand(
+        "Human Player Station",
+        new ParallelCommandGroup(
+            new ElevatorCommand(
+                elevator, Constants.ElevatorConstants.HUMAN_PLAYER_STATION_MILLIMETERS),
+            new WristSetpointCommand(
+                endEffector, Constants.EndEffectorConstants.WRIST_HUMAN_PLAYER_INTAKE)));
+
+    NamedCommands.registerCommand(
+        "Flick",
+        new ParallelCommandGroup(
+            // new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
+            (new SequentialCommandGroup(
+                new WaitCommand(0.5), new ProxyCommand(() -> new WristFlickCommand(endEffector)))))
+
+        /* .withTimeout(1.1) */ ) // Ensures flick completes in 1 second
+
+    // Total timeout
+    ;
 
     autoChooser = AutoBuilder.buildAutoChooser();
     SmartDashboard.putData("Auto Chooser", autoChooser);
@@ -340,7 +378,18 @@ public class RobotContainer {
     new Trigger(ZeroSupplier)
         .onTrue(
             new ParallelCommandGroup(
-                new ElevatorCommand(elevator, 0), new WristSetpointCommand(endEffector, 0)));
+                new ElevatorCommand(elevator, 0), new WristSetpointCommand(endEffector, 0)))
+        .onTrue(new InstantCommand(() -> recentReef4HeightPress = false));
+
+    new Trigger(RightStickButtonSupplier)
+        .onTrue(
+            new ParallelCommandGroup(
+                new ElevatorCommand(
+                    elevator, Constants.ElevatorConstants.HUMAN_PLAYER_STATION_MILLIMETERS),
+                // new ElevatorCommand(
+                // elevator, Constants.ElevatorConstants.HUMAN_PLAYER_STATION_MILLIMETERS),
+                new WristSetpointCommand(
+                    endEffector, Constants.EndEffectorConstants.WRIST_HUMAN_PLAYER_INTAKE)));
 
     new Trigger(ReefHeight1Supplier)
         .onTrue(
@@ -404,20 +453,10 @@ public class RobotContainer {
     // intake, Constants.IntakeConstants.INTAKE_GROUND_ALGAE_POWER)));
 
     new Trigger(CoralIntakeSup)
-        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER))
-        .onTrue(
-            new ParallelCommandGroup(
-                elevator.run(() -> elevator.setElevatorPosition(HUMAN_PLAYER_STATION_MILLIMETERS)),
-                // new ElevatorCommand(
-                // elevator, Constants.ElevatorConstants.HUMAN_PLAYER_STATION_MILLIMETERS),
-                new WristSetpointCommand(
-                    endEffector, Constants.EndEffectorConstants.WRIST_HUMAN_PLAYER_INTAKE)));
+        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
 
     new Trigger(CoralReefScoreSup)
         .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER));
-
-    new Trigger(NormIntake)
-        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
 
     // new Trigger(AlgaeProcessorOuttakeSup)
     // .onTrue(
@@ -435,8 +474,7 @@ public class RobotContainer {
                     new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
                     new WristSetpointCommand(
                         endEffector, Constants.EndEffectorConstants.WRIST_ALGAE_POSITION))))
-        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER))
-        .whileTrue(new AlgaeAlign(driveTrain));
+        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
 
     new Trigger(removeAlgaeLowSupplier)
         .onTrue(
@@ -446,8 +484,7 @@ public class RobotContainer {
                     new WaitCommand(0.5), // Wait 2 seconds before running the wrist command
                     new WristSetpointCommand(
                         endEffector, Constants.EndEffectorConstants.WRIST_ALGAE_POSITION))))
-        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER))
-        .whileTrue(new AlgaeAlign(driveTrain));
+        .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
 
     new Trigger(LeftReefLineupSup)
         .whileTrue(
@@ -475,29 +512,6 @@ public class RobotContainer {
                 new RightReefAlign(driveTrain),
                 () -> recentReef4HeightPress));
 
-    // new Trigger(L4RightAlign).whileTrue(new LevelFourRightAlign(driveTrain,
-    // endEffector));
-
-    new Trigger(L4LeftAlign)
-        .whileTrue(
-            new SequentialCommandGroup(
-                new LevelFourLeftAlign(driveTrain).withTimeout(2.0),
-                new ParallelCommandGroup(
-                    new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
-                    new SequentialCommandGroup(
-                        new WaitCommand(0.5),
-                        new ProxyCommand(new WristFlickCommand(endEffector))))));
-
-    new Trigger(L4RightAlign)
-        .whileTrue(
-            new SequentialCommandGroup(
-                new LevelFourRightAlign(driveTrain).withTimeout(2.0),
-                new ParallelCommandGroup(
-                    new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
-                    new SequentialCommandGroup(
-                        new WaitCommand(0.5),
-                        new ProxyCommand(new WristFlickCommand(endEffector))))));
-
     new Trigger(AlgaeProcessorPositionSup)
         .onTrue(
             new ParallelCommandGroup(
@@ -518,6 +532,9 @@ public class RobotContainer {
                         endEffector, Constants.EndEffectorConstants.WRIST_BARGE_POSITION))));
 
     new Trigger(flick).onTrue(new WristFlickCommand(endEffector));
+
+    new Trigger(backupIntake)
+        .onTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
   }
 
   // Schedule `exampleMethodCommand` when the Xbox controller's B button is
@@ -539,11 +556,11 @@ public class RobotContainer {
           driveTrain::setChassisSpeeds,
           new PPHolonomicDriveController(
               new com.pathplanner.lib.config.PIDConstants(
-                  0.15, 0,
-                  0), // PID constants to correct for translation error (used to create the X
+                  0.0, 0.0,
+                  0.0), // PID constants to correct for translation error (used to create the X
               // and Y PID controllers)
               new com.pathplanner.lib.config.PIDConstants(
-                  2, 0, 0) // PID constants to correct for rotation error (used to create the
+                  0.0, 0, 0) // PID constants to correct for rotation error (used to create the
               // rotation controller)
               ),
           RobotConfig.fromGUISettings(),

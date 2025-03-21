@@ -126,7 +126,8 @@ public class Lights extends SubsystemBase {
     public void setColor(Color color) {
       // clearAnimation();
       candle.setLEDs(color.red, color.green, color.blue, 0, startIndex, segmentSize);
-      // System.out.println("setting color to" + color.red + color.blue + color.green);
+      // System.out.println("setting color to" + color.red + color.blue +
+      // color.green);
     }
 
     private void setAnimation(Animation animation) {

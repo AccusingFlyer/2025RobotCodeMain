@@ -7,7 +7,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Middle Start to G"
+            "pathName": "Top Start to I"
           }
         },
         {
@@ -42,7 +42,7 @@
               {
                 "type": "named",
                 "data": {
-                  "name": "Left Reef Auto Align"
+                  "name": "Right Reef Auto Align"
                 }
               }
             ]

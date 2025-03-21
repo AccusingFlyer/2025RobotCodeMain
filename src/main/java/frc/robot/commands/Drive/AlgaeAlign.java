@@ -51,7 +51,7 @@ public class AlgaeAlign extends Command {
       double ySpeed = -yController.calculate(postions[0]);
       double rotValue = -rotController.calculate(postions[4]);
 
-      drive.drive(-xSpeed, -ySpeed, rotValue, false, true);
+      drive.drive(xSpeed, ySpeed, rotValue, false, true);
 
       if (!rotController.atSetpoint() || !yController.atSetpoint() || !xController.atSetpoint()) {
         stopTimer.reset();

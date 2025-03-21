@@ -42,7 +42,8 @@ public class ElevatorSubsystem extends SubsystemBase {
     // slot0Configs.kG = 0.60;
     // slot0Configs.kV = 1; // A velocity target of 1 rps results in 0.12 V output
     // slot0Configs.kA = 1; // An acceleration of 1 rps/s requires 0.01 V output .01
-    // slot0Configs.kP = 1.8; // A position error of 2.5 rotations results in 12 V output
+    // slot0Configs.kP = 1.8; // A position error of 2.5 rotations results in 12 V
+    // output
     // slot0Configs.kI = 0.0; // no output for integrated error
     // slot0Configs.kD = 1.6; // A velocity error of 1 rps results in 0.1 V output
 
@@ -111,7 +112,8 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     elevatorControl.withPosition(setpoint);
 
-    // double avgPosition = (-getEncoderLeft() + getEncoderRight()) / 2.0; // Try using an abs value
+    // double avgPosition = (-getEncoderLeft() + getEncoderRight()) / 2.0; // Try
+    // using an abs value
     // for encoder left not negative.
     // double deviation = getEncoderRight() + getEncoderLeft();
 
@@ -127,27 +129,28 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   // public void setElevatorPosition(ElevatorStates height) {
-  //   switch (height) {
-  //     case Reef1:
-  //       setElevatorPosition(REEF_LEVEL_1_MILLIMETERS);
-  //       break;
-  //     case Reef2:
-  //       setElevatorPosition(REEF_LEVEL_2_MILLIMETERS);
-  //       break;
-  //     case Reef3:
-  //       setElevatorPosition(REEF_LEVEL_3_MILLIMETERS);
-  //       break;
-  //     case Reef4:
-  //       setElevatorPosition(REEF_LEVEL_4_MILLIMETERS);
-  //       break;
-  //     case HumanPlayer:
-  //       setElevatorPosition(HUMAN_PLAYER_STATION_MILLIMETERS);
-  //       break;
-  //   }
+  // switch (height) {
+  // case Reef1:
+  // setElevatorPosition(REEF_LEVEL_1_MILLIMETERS);
+  // break;
+  // case Reef2:
+  // setElevatorPosition(REEF_LEVEL_2_MILLIMETERS);
+  // break;
+  // case Reef3:
+  // setElevatorPosition(REEF_LEVEL_3_MILLIMETERS);
+  // break;
+  // case Reef4:
+  // setElevatorPosition(REEF_LEVEL_4_MILLIMETERS);
+  // break;
+  // case HumanPlayer:
+  // setElevatorPosition(HUMAN_PLAYER_STATION_MILLIMETERS);
+  // break;
+  // }
   // }
 
   // public boolean isElevatorAtPose() {
-  //   return elevatorMotor1.getClosedLoopError().getValueAsDouble() < ELEVATOR_THRESHOLD;
+  // return elevatorMotor1.getClosedLoopError().getValueAsDouble() <
+  // ELEVATOR_THRESHOLD;
   // }
 
   public void setMotors(double speed1, double speed2) {
@@ -175,11 +178,11 @@ public class ElevatorSubsystem extends SubsystemBase {
     // This method will be called once per scheduler run
     logMotors();
     // if (elevatorHallEffect1.get()) {
-    //   elevatorMotor1.setPosition(0);
+    // elevatorMotor1.setPosition(0);
     // }
 
     // if (elevatorHallEffect2.get()) {
-    //   elevatorMotor2.setPosition(0);
+    // elevatorMotor2.setPosition(0);
     // }
 
     SmartDashboard.putNumber("Left Elevator", getEncoderLeft());

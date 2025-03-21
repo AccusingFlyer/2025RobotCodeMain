@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 3.6802254098360656,
-        "y": 5.097899590163934
+        "x": 3.485958904109589,
+        "y": 5.505029965753424
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.192123139951182,
-        "y": 5.701773658507533
+        "x": 2.9978566342247053,
+        "y": 6.108904034097024
       },
       "isLocked": false,
       "linkedName": "L"
     },
     {
       "anchor": {
-        "x": 1.6662909836065571,
-        "y": 7.375563524590164
+        "x": 1.503,
+        "y": 7.706
       },
       "prevControl": {
-        "x": 2.454331315428985,
-        "y": 6.5042752713831495
+        "x": 2.291040331822427,
+        "y": 6.834711746792986
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 1.0,
-    "maxAcceleration": 1.0,
+    "maxVelocity": 4.5,
+    "maxAcceleration": 4.3,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 880.0,
     "nominalVoltage": 12.0,
@@ -42,7 +42,7 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -52.74558013148374
+    "rotation": -74.69873946428524
   },
   "reversed": false,
   "folder": "Quarter Pounder",

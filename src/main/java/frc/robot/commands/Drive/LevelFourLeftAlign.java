@@ -17,7 +17,7 @@ public class LevelFourLeftAlign extends Command {
   public LevelFourLeftAlign(DrivetrainSubsystem drive) {
     xController = new PIDController(2.5, 0, 0); // Vertical movement
     yController = new PIDController(2.5, 0, 0); // Horitontal movement
-    rotController = new PIDController(0.025, 0, 0); // Rotation
+    rotController = new PIDController(0, 0, 0); // Rotation
 
     this.drive = drive;
 
@@ -31,13 +31,13 @@ public class LevelFourLeftAlign extends Command {
     this.dontSeeTagTimer = new Timer();
     this.dontSeeTagTimer.start();
 
-    rotController.setSetpoint(-16.5);
+    rotController.setSetpoint(-22.4); // -22.4
     rotController.setTolerance(0.5);
 
-    xController.setSetpoint(-1.03);
+    xController.setSetpoint(-0.95); // -0.95
     xController.setTolerance(0.8);
 
-    yController.setSetpoint(-0.77);
+    yController.setSetpoint(-0.79); // -0.79
     yController.setTolerance(0.8);
 
     hasStartedScoring = false;
@@ -56,7 +56,7 @@ public class LevelFourLeftAlign extends Command {
       double ySpeed = -yController.calculate(postions[0]);
       double rotValue = -rotController.calculate(postions[4]);
 
-      drive.drive(-xSpeed, -ySpeed, rotValue, false, true);
+      drive.drive(xSpeed, ySpeed, rotValue, false, true);
 
       if (!rotController.atSetpoint() || !yController.atSetpoint() || !xController.atSetpoint()) {
         stopTimer.reset();

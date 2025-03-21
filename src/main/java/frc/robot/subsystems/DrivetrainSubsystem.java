@@ -64,6 +64,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
             getGyroscopeRotation(),
             getModulePositions(),
             new Pose2d());
+
     // odometer.setVisionMeasurementStdDevs(VecBuilder.fill(0.7, 0.7, 99999999));
     PathPlannerLogging.setLogActivePathCallback(
         (poses) -> m_field.getObject("path").setPoses(poses));
@@ -78,6 +79,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         new PathConstraints(3.0, 1.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
     return AutoBuilder.pathfindToPose(targetPose, constraints);
   }
+
   /*
    * flips if needed
    */
@@ -150,6 +152,7 @@ public class DrivetrainSubsystem extends SubsystemBase {
         -chassisSpeeds.vyMetersPerSecond,
         -chassisSpeeds.omegaRadiansPerSecond);
   }
+
   /* Used by SwerveControllerCommand in Auto */
   public void setModuleStates(SwerveModuleState[] desiredStates) {
     SwerveDriveKinematics.desaturateWheelSpeeds(desiredStates, Constants.DriveConstants.maxSpeed);
@@ -404,13 +407,13 @@ public class DrivetrainSubsystem extends SubsystemBase {
     // sets the robot orientation for each of the limelights, which is required for
     // the
     // if (Preferences.getBoolean("Use Limelight", false)) {
-    //   if (SmartDashboard.getBoolean("Vision/force use limelight", false)) {
-    //     forceUpdateOdometryWithVision();
-    //   } else {
-    //     updateOdometryWithVision();
-    //   }
+    // if (SmartDashboard.getBoolean("Vision/force use limelight", false)) {
+    // forceUpdateOdometryWithVision();
     // } else {
-    //   RobotState.getInstance().LimelightsUpdated = false;
+    // updateOdometryWithVision();
+    // }
+    // } else {
+    // RobotState.getInstance().LimelightsUpdated = false;
     // }
 
     m_field.setRobotPose(odometer.getEstimatedPosition());
