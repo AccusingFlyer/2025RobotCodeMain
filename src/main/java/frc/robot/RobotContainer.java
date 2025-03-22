@@ -253,9 +253,9 @@ public class RobotContainer {
         new ParallelCommandGroup(
                 new WristSetpointCommand(endEffector, Constants.EndEffectorConstants.WRIST_L4),
                 new SequentialCommandGroup(
-                    new WaitCommand(0.5),
+                    new WaitCommand(1.0),
                     new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER)))
-            .withTimeout(1.5));
+            .withTimeout(2.0));
 
     NamedCommands.registerCommand("Flick Up", new FlickUpCommand(endEffector));
 
@@ -486,31 +486,45 @@ public class RobotContainer {
                         endEffector, Constants.EndEffectorConstants.WRIST_ALGAE_POSITION))))
         .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
 
+    // new Trigger(LeftReefLineupSup)
+    //     .whileTrue(
+    //         new ConditionalCommand(
+    //             new SequentialCommandGroup(
+    //                 new LevelFourLeftAlign(driveTrain).withTimeout(2.0),
+    //                 new ParallelCommandGroup(
+    //                     new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
+    //                     new SequentialCommandGroup(
+    //                         new WaitCommand(0.5),
+    //                         new ProxyCommand(new WristFlickCommand(endEffector))))),
+    //             new LeftReefAlign(driveTrain),
+    //             () -> recentReef4HeightPress));
+
     new Trigger(LeftReefLineupSup)
         .whileTrue(
             new ConditionalCommand(
-                new SequentialCommandGroup(
-                    new LevelFourLeftAlign(driveTrain).withTimeout(2.0),
-                    new ParallelCommandGroup(
-                        new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
-                        new SequentialCommandGroup(
-                            new WaitCommand(0.5),
-                            new ProxyCommand(new WristFlickCommand(endEffector))))),
+                new LevelFourLeftAlign(driveTrain),
                 new LeftReefAlign(driveTrain),
                 () -> recentReef4HeightPress));
 
     new Trigger(RightReefLineupSup)
         .whileTrue(
             new ConditionalCommand(
-                new SequentialCommandGroup(
-                    new LevelFourRightAlign(driveTrain).withTimeout(2.0),
-                    new ParallelCommandGroup(
-                        new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
-                        new SequentialCommandGroup(
-                            new WaitCommand(0.5),
-                            new ProxyCommand(new WristFlickCommand(endEffector))))),
+                new LevelFourRightAlign(driveTrain),
                 new RightReefAlign(driveTrain),
                 () -> recentReef4HeightPress));
+
+    // new Trigger(RightReefLineupSup)
+    //     .whileTrue(
+    //         new ConditionalCommand(
+    //             new SequentialCommandGroup(
+    //                 new LevelFourRightAlign(driveTrain).withTimeout(2.0),
+    //                 new ParallelCommandGroup(
+    //                     new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
+    //                     new SequentialCommandGroup(
+    //                         new WaitCommand(0.5),
+    //                         new ProxyCommand(new WristFlickCommand(endEffector))))),
+    //             new RightReefAlign(driveTrain),
+    //             () -> recentReef4HeightPress));
 
     new Trigger(AlgaeProcessorPositionSup)
         .onTrue(

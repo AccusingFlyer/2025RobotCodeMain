@@ -3,13 +3,13 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 1.503,
-        "y": 7.706
+        "x": 1.5476455479452054,
+        "y": 7.518471746575342
       },
       "prevControl": null,
       "nextControl": {
-        "x": 2.0450461441691106,
-        "y": 7.154759216569294
+        "x": 2.0896916921143163,
+        "y": 6.967230963144636
       },
       "isLocked": false,
       "linkedName": "Top Coral Station (Right)"

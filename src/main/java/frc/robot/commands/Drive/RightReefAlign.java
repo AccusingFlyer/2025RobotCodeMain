@@ -19,7 +19,7 @@ public class RightReefAlign extends Command {
   public RightReefAlign(DrivetrainSubsystem drive) {
     xController = new PIDController(2.5, 0, 0); // Vertical movement
     yController = new PIDController(2.5, 0, 0); // Horitontal movement
-    rotController = new PIDController(0, 0, 0); // Rotation
+    rotController = new PIDController(0.05, 0, 0); // Rotation
 
     this.drive = drive;
     addRequirements(drive);
@@ -55,7 +55,7 @@ public class RightReefAlign extends Command {
       ySpeed = -yController.calculate(postions[0]);
       rotValue = -rotController.calculate(postions[4]);
 
-      drive.drive(xSpeed, ySpeed, rotValue, false, true);
+      drive.drive(xSpeed, ySpeed, -rotValue, false, true);
 
       if (!rotController.atSetpoint() || !yController.atSetpoint() || !xController.atSetpoint()) {
         stopTimer.reset();
