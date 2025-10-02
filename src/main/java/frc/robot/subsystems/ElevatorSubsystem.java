@@ -74,10 +74,10 @@ public class ElevatorSubsystem extends SubsystemBase {
     // var talonFXConfigs = new TalonFXConfiguration();
 
     talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 120;
+    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 150;
 
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 60;
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 90;
 
     talonFXConfigs.MotorOutput.withNeutralMode(NeutralModeValue.Brake);
 
