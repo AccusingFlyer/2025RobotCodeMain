@@ -126,6 +126,7 @@ public class RobotContainer {
   DoubleSupplier ControllerZAxisSupplier;
   boolean RightStickSupplier;
   BooleanSupplier RightStickButtonSupplier;
+  BooleanSupplier OperatorBargeSupplier;
   BooleanSupplier ZeroSupplier;
   BooleanSupplier NormIntake;
   BooleanSupplier flick;
@@ -184,6 +185,8 @@ public class RobotContainer {
 
     BargeHeightSupplier = () -> driverControllerXbox.getPOV() == 270;
     backupIntake = () -> (operatorControllerXbox.getLeftTriggerAxis() > 0.1);
+
+    OperatorBargeSupplier = () -> (operatorControllerXbox.getRightTriggerAxis() > 0.1);
     // ReefA =
     // () ->
     // (driverControllerXbox.getRightTriggerAxis() > 0.1)
@@ -455,6 +458,8 @@ public class RobotContainer {
     new Trigger(CoralIntakeSup)
         .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
 
+    new Trigger(OperatorBargeSupplier).whileTrue(new ClawRoller(endEffector, -12.0));
+
     new Trigger(CoralReefScoreSup)
         .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER));
 
@@ -487,17 +492,17 @@ public class RobotContainer {
         .whileTrue(new ClawRoller(endEffector, Constants.EndEffectorConstants.INTAKE_POWER));
 
     // new Trigger(LeftReefLineupSup)
-    //     .whileTrue(
-    //         new ConditionalCommand(
-    //             new SequentialCommandGroup(
-    //                 new LevelFourLeftAlign(driveTrain).withTimeout(2.0),
-    //                 new ParallelCommandGroup(
-    //                     new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
-    //                     new SequentialCommandGroup(
-    //                         new WaitCommand(0.5),
-    //                         new ProxyCommand(new WristFlickCommand(endEffector))))),
-    //             new LeftReefAlign(driveTrain),
-    //             () -> recentReef4HeightPress));
+    // .whileTrue(
+    // new ConditionalCommand(
+    // new SequentialCommandGroup(
+    // new LevelFourLeftAlign(driveTrain).withTimeout(2.0),
+    // new ParallelCommandGroup(
+    // new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
+    // new SequentialCommandGroup(
+    // new WaitCommand(0.5),
+    // new ProxyCommand(new WristFlickCommand(endEffector))))),
+    // new LeftReefAlign(driveTrain),
+    // () -> recentReef4HeightPress));
 
     new Trigger(LeftReefLineupSup)
         .whileTrue(
@@ -514,17 +519,17 @@ public class RobotContainer {
                 () -> recentReef4HeightPress));
 
     // new Trigger(RightReefLineupSup)
-    //     .whileTrue(
-    //         new ConditionalCommand(
-    //             new SequentialCommandGroup(
-    //                 new LevelFourRightAlign(driveTrain).withTimeout(2.0),
-    //                 new ParallelCommandGroup(
-    //                     new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
-    //                     new SequentialCommandGroup(
-    //                         new WaitCommand(0.5),
-    //                         new ProxyCommand(new WristFlickCommand(endEffector))))),
-    //             new RightReefAlign(driveTrain),
-    //             () -> recentReef4HeightPress));
+    // .whileTrue(
+    // new ConditionalCommand(
+    // new SequentialCommandGroup(
+    // new LevelFourRightAlign(driveTrain).withTimeout(2.0),
+    // new ParallelCommandGroup(
+    // new ClawRoller(endEffector, Constants.EndEffectorConstants.EJECT_POWER),
+    // new SequentialCommandGroup(
+    // new WaitCommand(0.5),
+    // new ProxyCommand(new WristFlickCommand(endEffector))))),
+    // new RightReefAlign(driveTrain),
+    // () -> recentReef4HeightPress));
 
     new Trigger(AlgaeProcessorPositionSup)
         .onTrue(

@@ -7,9 +7,9 @@ package frc.robot.subsystems;
 import static frc.robot.settings.Constants.ElevatorConstants.*;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -17,24 +17,27 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.helpers.MotorLogger;
 
 public class ElevatorSubsystem extends SubsystemBase {
+
+  // creates a new Elevator Subsystem
   private TalonFXConfiguration eleMotorConfig;
   private double zeroPoint;
+  private TalonFX elevatorMotor2 = new TalonFX(ELEVATOR_MOTOR_2_ID);
+  private MotionMagicVoltage elevatorControl = new MotionMagicVoltage(0);
+
   DigitalInput elevatorHallEffect1;
   DigitalInput elevatorHallEffect2;
-  MotorLogger motorLogger1;
+  // MotorLogger motorLogger1;
   MotorLogger motorLogger2;
+
   /** Creates a new ElevatorSubsystem. */
-  private TalonFX elevatorMotor1 = new TalonFX(ELEVATOR_MOTOR_1_ID);
 
-  private TalonFX elevatorMotor2 = new TalonFX(ELEVATOR_MOTOR_2_ID);
-
-  private MotionMagicVoltage elevatorControl = new MotionMagicVoltage(0);
+  // private TalonFX elevatorMotor1 = new TalonFX(ELEVATOR_MOTOR_1_ID);
 
   public ElevatorSubsystem() {
 
     var talonFXConfigs = new TalonFXConfiguration();
 
-    elevatorMotor1.setNeutralMode(NeutralModeValue.Brake);
+    // elevatorMotor1.setNeutralMode(NeutralModeValue.Brake);
     elevatorMotor2.setNeutralMode(NeutralModeValue.Brake);
 
     // var slot0Configs = talonFXConfigs.Slot0;
@@ -64,26 +67,28 @@ public class ElevatorSubsystem extends SubsystemBase {
     // .withMotionMagicJerk(2531));
 
     // Set elevatorMotor2 to follow elevatorMotor1, with auxiliary control
-    // elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_1_ID, true));
+    //// elevatorMotor2.setControl(new Follower(ELEVATOR_MOTOR_2_ID, true));
 
     talonFXConfigs.Feedback.SensorToMechanismRatio = 4.375;
 
     // var talonFXConfigs = new TalonFXConfiguration();
 
     talonFXConfigs.CurrentLimits.StatorCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 60;
+    talonFXConfigs.CurrentLimits.StatorCurrentLimit = 120;
 
     talonFXConfigs.CurrentLimits.SupplyCurrentLimitEnable = true;
-    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 30;
+    talonFXConfigs.CurrentLimits.SupplyCurrentLimit = 60;
 
     talonFXConfigs.MotorOutput.withNeutralMode(NeutralModeValue.Brake);
 
-    elevatorMotor1.setControl(new Follower(ELEVATOR_MOTOR_2_ID, true));
+    // elevatorMotor1.setControl(new Follower(ELEVATOR_MOTOR_2_ID, true));
 
-    elevatorMotor1.getConfigurator().apply(talonFXConfigs);
+    // elevatorMotor1.getConfigurator().apply(talonFXConfigs);
+
+    talonFXConfigs.MotorOutput.Inverted = InvertedValue.Clockwise_Positive;
     elevatorMotor2.getConfigurator().apply(talonFXConfigs);
 
-    motorLogger1 = new MotorLogger("/elevator/motor1");
+    // motorLogger1 = new MotorLogger("/elevator/motor1");
     motorLogger2 = new MotorLogger("/elevator/motor2");
 
     // elevatorHallEffect1 = new DigitalInput(0);
@@ -91,13 +96,13 @@ public class ElevatorSubsystem extends SubsystemBase {
   }
 
   private void logMotors() {
-    motorLogger1.log(elevatorMotor1);
+    // motorLogger1.log(elevatorMotor1);
     motorLogger2.log(elevatorMotor2);
   }
 
-  public double getEncoderLeft() {
-    return -elevatorMotor1.getPosition().getValueAsDouble();
-  }
+  // public double getEncoderLeft() {
+  // return -elevatorMotor1.getPosition().getValueAsDouble();
+  // }
 
   public double getEncoderRight() {
     return elevatorMotor2.getPosition().getValueAsDouble();
@@ -106,11 +111,11 @@ public class ElevatorSubsystem extends SubsystemBase {
   /**
    * Sets the elevator to a position relative to the 0 set by createZero.
    *
-   * @param setpoint double that controls how many millimeters from the distance sensor
+   * <p>//* @param setpoint double that controls how many millimeters from the distance sensor
    */
   public void setElevatorPosition(double setpoint) {
 
-    elevatorControl.withPosition(setpoint);
+    elevatorMotor2.setControl(elevatorControl.withPosition(setpoint));
 
     // double avgPosition = (-getEncoderLeft() + getEncoderRight()) / 2.0; // Try
     // using an abs value
@@ -125,7 +130,6 @@ public class ElevatorSubsystem extends SubsystemBase {
 
     // Set motors with primary control and synchronization correction
 
-    elevatorMotor2.setControl(elevatorControl);
   }
 
   // public void setElevatorPosition(ElevatorStates height) {
@@ -153,30 +157,32 @@ public class ElevatorSubsystem extends SubsystemBase {
   // ELEVATOR_THRESHOLD;
   // }
 
-  public void setMotors(double speed1, double speed2) {
-    elevatorMotor1.set(-speed1);
-    elevatorMotor2.set(speed2);
+  public void setMotors(double speed1) {
+    // elevatorMotor1.set(-speed1);
+    elevatorMotor2.set(speed1);
   }
 
   public void setNeutralMode(NeutralModeValue mode) {
-    elevatorMotor1.setNeutralMode(mode);
+    // elevatorMotor1.setNeutralMode(mode);
     elevatorMotor2.setNeutralMode(mode);
   }
 
   public void stopElevator() {
-    elevatorMotor1.set(0);
+    // elevatorMotor1.set(0);
     elevatorMotor2.set(0);
   }
 
   public void zeroMotorEncoders() {
-    elevatorMotor1.setPosition(0);
+    // elevatorMotor1.setPosition(0);
     elevatorMotor2.setPosition(0);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    logMotors();
+    motorLogger2.log(elevatorMotor2);
+
+    // logMotors();
     // if (elevatorHallEffect1.get()) {
     // elevatorMotor1.setPosition(0);
     // }
@@ -185,7 +191,7 @@ public class ElevatorSubsystem extends SubsystemBase {
     // elevatorMotor2.setPosition(0);
     // }
 
-    SmartDashboard.putNumber("Left Elevator", getEncoderLeft());
+    // SmartDashboard.putNumber("Left Elevator", getEncoderLeft());
     SmartDashboard.putNumber("Right Elevator", getEncoderRight());
   }
 

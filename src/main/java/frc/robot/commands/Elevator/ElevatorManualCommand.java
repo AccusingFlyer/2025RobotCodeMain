@@ -19,6 +19,6 @@ public class ElevatorManualCommand extends Command {
   public void execute() {
     double speed = -MathUtil.applyDeadband(RobotContainer.operatorControllerXbox.getRightY(), 0.1);
 
-    elevator.setMotors(speed, speed);
+    elevator.setMotors(speed);
   }
 }

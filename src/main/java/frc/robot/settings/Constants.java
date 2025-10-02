@@ -337,7 +337,7 @@ public final class Constants {
     public static final double REEF_LEVEL_2_MILLIMETERS = 6.6;
     public static final double REEF_LEVEL_3_MILLIMETERS = 9.9;
     public static final double REEF_LEVEL_4_MILLIMETERS = 15.6;
-    public static final double HIGH_ALGAE_HEIGHT = 9.0;
+    public static final double HIGH_ALGAE_HEIGHT = 8.1;
     public static final double LOW_ALGAE_HEIGHT = 5.3;
     public static final double PROCESSOR_HEIGHT_MILLIMETERS = 2.5;
     // public static final double ELEVATOR_MILLIMETERS_TO_ROTATIONS = 2531;
@@ -356,7 +356,7 @@ public final class Constants {
 
     public static final double WRIST_PROCESSOR_POSITION = -4.0;
 
-    public static final double WRIST_BARGE_POSITION = -1.8;
+    public static final double WRIST_BARGE_POSITION = 1.0; // -2.3
 
     public static final double INTAKE_POWER = 3.5;
     public static final double EJECT_POWER = -3.5;

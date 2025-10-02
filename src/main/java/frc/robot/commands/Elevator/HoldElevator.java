@@ -25,7 +25,7 @@ public class HoldElevator extends Command {
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    holdPosition = (-elevator.getEncoderLeft()) + (elevator.getEncoderRight()) / 2.0;
+    holdPosition = -elevator.getEncoderRight();
 
     pidControllerAv.setSetpoint(holdPosition);
     pidController1.setSetpoint(holdPosition);

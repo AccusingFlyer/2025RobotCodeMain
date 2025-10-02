@@ -19,12 +19,12 @@ public class ZeroElevator extends Command {
   public void execute() {
     double speed = -MathUtil.applyDeadband(RobotContainer.operatorControllerXbox.getLeftY(), 0.1);
 
-    elevator.setMotors(speed, speed);
+    elevator.setMotors(speed);
   }
 
   @Override
   public void end(boolean interrupted) {
-    elevator.setMotors(0, 0);
+    elevator.setMotors(0);
     elevator.zeroMotorEncoders();
   }
 }
